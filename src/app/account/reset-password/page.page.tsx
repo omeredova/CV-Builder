@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PasswordResetPage } from "@/pages/auth/password-reset";
+import { PasswordResetPage } from "@/pages/auth";
 
 export const metadata: Metadata = {
   title: "Reset Password | CV Builder",

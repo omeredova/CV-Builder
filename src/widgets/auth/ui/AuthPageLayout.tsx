@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { AuthTabs, type AuthTab } from "@/features/auth/navigation";
+import { AuthTabs, type AuthTab } from "@/features/auth";
 import { cn } from "@/shared/lib/class-names";
 
 export interface AuthPageLayoutProps {

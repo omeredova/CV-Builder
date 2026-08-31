@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PasswordRecoveryPage } from "@/pages/auth/password-recovery";
+import { PasswordRecoveryPage } from "@/pages/auth";
 
 export const metadata: Metadata = {
   title: "Forgot Password | CV Builder",

@@ -1,4 +1,4 @@
-import { PasswordRecoveryForm } from "@/features/auth/password-recovery";
+import { PasswordRecoveryForm } from "@/features/auth";
 import { AuthPageLayout } from "@/widgets/auth";
 
 export function PasswordRecoveryPage() {

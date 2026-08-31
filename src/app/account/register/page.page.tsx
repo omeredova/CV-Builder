@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SignUpPage } from "@/pages/auth/sign-up";
+import { SignUpPage } from "@/pages/auth";
 
 export const metadata: Metadata = {
   title: "Sign Up | CV Builder",
