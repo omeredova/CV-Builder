@@ -3,14 +3,8 @@
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { AuthFormCard } from "@/features/auth";
 import { Button } from "@/shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
 import { FormField } from "@/shared/ui/form-field";
 
 import { type SignInValues, validateSignIn } from "../model/validation";
@@ -49,17 +43,8 @@ export function SignInForm({ authenticationError }: SignInFormProps) {
   }
 
   return (
-    <Card className="w-full border-0 bg-transparent shadow-none">
-      <CardHeader className="mb-auth-heading-bottom gap-0 p-0 text-center">
-        <CardTitle as="h1" className="text-auth-title font-normal leading-tight sm:text-4xl">
-          Welcome back
-        </CardTitle>
-        <CardDescription className="mt-auth-subtitle-top text-base text-card-foreground">
-          Hello again! Sign in to continue
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
+    <AuthFormCard subtitle="Hello again! Sign in to continue" title="Welcome back">
+      <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
           <div className="flex w-full flex-col items-center gap-auth-fields-gap">
             <FormField
               autoComplete="email"
@@ -101,8 +86,7 @@ export function SignInForm({ authenticationError }: SignInFormProps) {
           <Button asChild className="mt-auth-link-top" variant="ghost">
             <Link href="/account/recover-password">Forgot password</Link>
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+      </form>
+    </AuthFormCard>
   );
 }

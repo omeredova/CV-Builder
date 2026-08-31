@@ -25,6 +25,7 @@ describe("SignInForm", () => {
     await user.type(password, "12345");
     await user.tab();
     expect(screen.getByText("Password must be at least 6 characters long")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show password" })).toHaveClass("text-primary");
     expect(submit).toBeDisabled();
 
     await user.type(password, "6");
