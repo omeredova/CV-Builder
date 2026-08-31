@@ -4,7 +4,7 @@ import { AuthTabs, type AuthTab } from "@/features/auth/navigation";
 import { cn } from "@/shared/lib/class-names";
 
 export interface AuthPageLayoutProps {
-  activeTab: AuthTab;
+  activeTab?: AuthTab;
   children: ReactNode;
   contentClassName?: string;
 }
@@ -12,7 +12,7 @@ export interface AuthPageLayoutProps {
 export function AuthPageLayout({ activeTab, children, contentClassName }: AuthPageLayoutProps) {
   return (
     <main className="flex min-h-screen flex-col items-center bg-background px-auth-page-inline pb-auth-page-bottom pt-auth-page-top text-foreground sm:pt-auth-page-top-tablet">
-      <AuthTabs activeTab={activeTab} />
+      {activeTab ? <AuthTabs activeTab={activeTab} /> : null}
 
       <section
         className={cn(

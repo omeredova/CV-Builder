@@ -50,6 +50,7 @@
   --spacing-control-height: 3rem;
   --spacing-button-width: 10rem;
   --spacing-ghost-button-width: 13.75rem;
+  --spacing-password-recovery-button-width: 13.75rem;
   --spacing-field-width: 25rem;
 
   /* Authentication layout */
@@ -79,7 +80,7 @@
   --shadow-primary: var(--primary-shadow);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
     /* Surfaces and content */
     --background: #2e2e2e;
