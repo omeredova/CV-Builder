@@ -79,7 +79,7 @@
   --shadow-primary: var(--primary-shadow);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     /* Surfaces and content */
     --background: #2e2e2e;

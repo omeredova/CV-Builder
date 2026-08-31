@@ -14,7 +14,7 @@ const buttonVariants = cva(
         secondary:
           "w-button-width rounded-control border border-muted-foreground text-muted-foreground hover:bg-disabled hover:text-on-primary active:bg-muted-foreground active:text-on-primary active:shadow-control-active",
         ghost:
-          "w-ghost-button-width text-muted-foreground hover:border hover:border-muted-foreground active:border active:border-muted-foreground active:bg-disabled",
+          "w-ghost-button-width rounded-control text-muted-foreground hover:border hover:border-muted-foreground active:border active:border-muted-foreground active:bg-disabled",
       },
     },
     defaultVariants: { variant: "primary" },

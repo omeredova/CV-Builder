@@ -62,7 +62,10 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
           {passwordIcon ? (
             <button
               aria-label={passwordVisible ? "Hide password" : "Show password"}
-              className="absolute right-field-inline top-1/2 flex -translate-y-1/2 text-password-icon outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className={cn(
+                "absolute right-field-inline top-1/2 flex -translate-y-1/2 text-password-icon outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                error && "text-primary",
+              )}
               onClick={onPasswordVisibilityToggle}
               type="button"
             >
