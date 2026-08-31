@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 
-import { AuthFormCard } from "@/features/auth";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
 import { type SignInValues, validateSignIn } from "../model/validation";
+import { AuthFormCard } from "../../ui/AuthFormCard";
 
 export type AuthenticationError = "invalidCredentials" | "server";
 

@@ -1,4 +1,4 @@
-import { PasswordResetForm } from "@/features/auth/password-reset";
+import { PasswordResetForm } from "@/features/auth";
 import { AuthPageLayout } from "@/widgets/auth";
 
 export function PasswordResetPage() {
