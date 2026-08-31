@@ -11,6 +11,9 @@ export default defineConfig({
     css: true,
   },
   resolve: {
-    alias: { "@": path.resolve(import.meta.dirname, "./src") },
+    alias: {
+      "@/components/ui": path.resolve(import.meta.dirname, "./src/shared/ui"),
+      "@": path.resolve(import.meta.dirname, "./src"),
+    },
   },
 });

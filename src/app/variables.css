@@ -1,0 +1,96 @@
+:root {
+  /* Surfaces and content */
+  --background: #f5f5f7;
+  --card: #f5f5f7;
+  --card-foreground: #2e2e2e;
+  --foreground: #2e2e2e;
+  --muted-foreground: #626262;
+
+  /* Form controls */
+  --border: #aeaeae;
+  --placeholder: #c4c4c6;
+  --password-icon: #626262;
+  --disabled: #aeaeae;
+  --disabled-foreground: #e2e2e4;
+  --input-disabled-background: #c4c4c6;
+
+  /* Brand and actions */
+  --primary: #c63031;
+  --primary-active: #e9b0b0;
+  --on-primary: #f5f5f7;
+
+  /* Elevation */
+  --control-shadow: 0 4px 4px rgb(0 0 0 / 25%);
+  --primary-shadow: 0 1px 5px 0 rgb(0 0 0 / 12%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+    0 3px 1px -2px rgb(0 0 0 / 20%);
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder: var(--placeholder);
+  --color-password-icon: var(--password-icon);
+  --color-border: var(--border);
+  --color-disabled: var(--disabled);
+  --color-disabled-foreground: var(--disabled-foreground);
+  --color-input-disabled-background: var(--input-disabled-background);
+  --color-primary: var(--primary);
+  --color-primary-active: var(--primary-active);
+  --color-on-primary: var(--on-primary);
+
+  /* Typography */
+  --font-sans: "Roboto", Arial, sans-serif;
+  --text-auth-title: 2.125rem;
+
+  /* Control dimensions */
+  --spacing-control-height: 3rem;
+  --spacing-button-width: 10rem;
+  --spacing-ghost-button-width: 13.75rem;
+  --spacing-field-width: 25rem;
+
+  /* Authentication layout */
+  --spacing-auth-tabs-width: 18.75rem;
+  --spacing-auth-tabs-height: 3.5rem;
+  --spacing-auth-content-width: 34.625rem;
+  --spacing-auth-page-inline: 1.5rem;
+  --spacing-auth-page-top: 1.5rem;
+  --spacing-auth-page-top-tablet: 2.5rem;
+  --spacing-auth-page-bottom: 4rem;
+  --spacing-auth-content-offset: 10vh;
+  --spacing-auth-heading-bottom: 2.75rem;
+  --spacing-auth-subtitle-top: 1.25rem;
+  --spacing-auth-fields-gap: 2.25rem;
+  --spacing-auth-submit-top: 2.75rem;
+  --spacing-auth-link-top: 0.5rem;
+
+  /* Form-field layout */
+  --spacing-field-inline: 0.75rem;
+  --spacing-field-label-gap: 0.25rem;
+  --spacing-field-icon: 3rem;
+  --spacing-field-message-top: 0.25rem;
+
+  /* Shape and elevation */
+  --radius-control: 2.5rem;
+  --shadow-control-active: var(--control-shadow);
+  --shadow-primary: var(--primary-shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces and content */
+    --background: #2e2e2e;
+    --card: #2e2e2e;
+    --card-foreground: #f5f5f7;
+    --foreground: #f5f5f7;
+    --muted-foreground: #c4c4c6;
+
+    /* Form controls */
+    --placeholder: #626262;
+    --password-icon: #aeaeae;
+    --border: #aeaeae;
+  }
+}
