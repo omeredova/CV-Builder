@@ -1,30 +1,21 @@
-import { validateEmail, validatePassword } from "../../model/validation";
+import {
+  type PasswordConfirmationValues,
+  validateEmail,
+  validatePasswordConfirmation,
+} from "../../model/validation";
 
-export interface SignUpValues {
+export interface SignUpValues extends PasswordConfirmationValues {
   email: string;
-  password: string;
-  confirmPassword: string;
 }
 
 export type SignUpErrors = Partial<Record<keyof SignUpValues, string>>;
 
 export function validateSignUp(values: SignUpValues): SignUpErrors {
-  const errors: SignUpErrors = {};
+  const errors: SignUpErrors = validatePasswordConfirmation(values);
   const emailError = validateEmail(values.email);
-  const passwordError = validatePassword(values.password);
 
   if (emailError) {
     errors.email = emailError;
-  }
-
-  if (passwordError) {
-    errors.password = passwordError;
-  }
-
-  if (!values.confirmPassword) {
-    errors.confirmPassword = "Confirm Password is required";
-  } else if (values.confirmPassword !== values.password) {
-    errors.confirmPassword = "Passwords do not match";
   }
 
   return errors;
