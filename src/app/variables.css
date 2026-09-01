@@ -45,6 +45,8 @@
   /* Typography */
   --font-sans: "Roboto", Arial, sans-serif;
   --text-auth-title: 2.125rem;
+  --text-error-title: 2.125rem;
+  --leading-error-title: 1.25;
 
   /* Control dimensions */
   --spacing-control-height: 3rem;
@@ -53,6 +55,15 @@
   --spacing-password-recovery-button-width: 13.75rem;
   --spacing-password-reset-button-width: 7.5rem;
   --spacing-field-width: 25rem;
+
+  /* Error page layout */
+  --spacing-error-page-inline: 1.5rem;
+  --spacing-error-content-width: 35rem;
+  --spacing-error-content-height: 36.9375rem;
+  --spacing-error-content-gap: 2rem;
+  --spacing-error-header-gap: 1rem;
+  --spacing-error-icon-width: 8.75rem;
+  --spacing-error-icon-height: 7.5rem;
 
   /* Authentication layout */
   --spacing-auth-tabs-width: 18.75rem;
