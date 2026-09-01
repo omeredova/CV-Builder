@@ -1,10 +1,31 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SignUpForm } from "./sign-up-form";
 
+const { clearError, push, signUp } = vi.hoisted(() => ({
+  clearError: vi.fn(),
+  push: vi.fn(),
+  signUp: vi.fn(),
+}));
+
+vi.mock("../model/useSignUp", () => ({
+  useSignUp: () => ({ clearError, error: undefined, isLoading: false, signUp }),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
+
 describe("SignUpForm", () => {
+  beforeEach(() => {
+    clearError.mockReset();
+    push.mockReset();
+    signUp.mockReset();
+    signUp.mockResolvedValue(true);
+  });
+
   it("validates all fields and enables submission only for matching valid values", async () => {
     const user = userEvent.setup();
     render(<SignUpForm />);
@@ -44,5 +65,51 @@ describe("SignUpForm", () => {
       "role",
       "alert",
     );
+  });
+
+  it("registers valid values and navigates to email verification", async () => {
+    const user = userEvent.setup();
+    render(<SignUpForm />);
+
+    await user.type(screen.getByLabelText("Email"), "user@example.com");
+    await user.type(screen.getByLabelText("Password"), "123456");
+    await user.type(screen.getByLabelText("Confirm Password"), "123456");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(signUp).toHaveBeenCalledWith({
+      confirmPassword: "123456",
+      email: "user@example.com",
+      password: "123456",
+    });
+    expect(push).toHaveBeenCalledWith("/account/verify-email");
+  });
+
+  it("shows a duplicate-email error and keeps the entered values", async () => {
+    const user = userEvent.setup();
+    signUp.mockResolvedValue(false);
+    render(<SignUpForm registrationError="emailExists" />);
+
+    const email = screen.getByLabelText("Email");
+    await user.type(email, "existing@example.com");
+    await user.type(screen.getByLabelText("Password"), "123456");
+    await user.type(screen.getByLabelText("Confirm Password"), "123456");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByText("An account with this email already exists")).toBeInTheDocument();
+    expect(email).toHaveValue("existing@example.com");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("shows a friendly message for unexpected registration errors", async () => {
+    const user = userEvent.setup();
+    signUp.mockResolvedValue(false);
+    render(<SignUpForm registrationError="server" />);
+
+    await user.type(screen.getByLabelText("Email"), "user@example.com");
+    await user.type(screen.getByLabelText("Password"), "123456");
+    await user.type(screen.getByLabelText("Confirm Password"), "123456");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(await screen.findByText("Something went wrong. Please try again later")).toBeInTheDocument();
   });
 });

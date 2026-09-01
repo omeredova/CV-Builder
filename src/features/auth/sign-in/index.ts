@@ -1,1 +1,2 @@
-export { SignInForm, type AuthenticationError, type SignInFormProps } from "./ui/sign-in-form";
+export type { AuthenticationError } from "./model/authenticationError";
+export { SignInForm, type SignInFormProps } from "./ui/sign-in-form";

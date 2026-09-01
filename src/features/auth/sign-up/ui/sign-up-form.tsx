@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
+import type { RegistrationError } from "../model/registrationError";
+import { useSignUp } from "../model/useSignUp";
 import { type SignUpValues, validateSignUp } from "../model/validation";
 import { AuthFormCard } from "../../ui/AuthFormCard";
-
-export type RegistrationError = "emailExists" | "server";
 
 export interface SignUpFormProps {
   registrationError?: RegistrationError;
@@ -23,24 +24,36 @@ const REGISTRATION_ERROR_MESSAGES: Record<RegistrationError, string> = {
 };
 
 export function SignUpForm({ registrationError }: SignUpFormProps) {
+  const router = useRouter();
   const [values, setValues] = useState<SignUpValues>(INITIAL_VALUES);
   const [touched, setTouched] = useState<Partial<Record<keyof SignUpValues, boolean>>>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const { clearError, error: requestError, isLoading, signUp } = useSignUp();
   const errors = useMemo(() => validateSignUp(values), [values]);
   const isValid = Object.keys(errors).length === 0;
+  const displayedRegistrationError = requestError ?? registrationError;
 
   function updateField(field: keyof SignUpValues, value: string): void {
     setValues((current) => ({ ...current, [field]: value }));
+    clearError();
   }
 
   function touchField(field: keyof SignUpValues): void {
     setTouched((current) => ({ ...current, [field]: true }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setTouched({ email: true, password: true, confirmPassword: true });
+
+    if (!isValid || isLoading) {
+      return;
+    }
+
+    if (await signUp(values)) {
+      router.push("/account/verify-email");
+    }
   }
 
   return (
@@ -94,12 +107,17 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
               value={values.confirmPassword}
             />
           </div>
-          {registrationError ? (
+          {displayedRegistrationError ? (
             <p className="mt-field-message-top text-center text-xs text-primary" role="alert">
-              {REGISTRATION_ERROR_MESSAGES[registrationError]}
+              {REGISTRATION_ERROR_MESSAGES[displayedRegistrationError]}
             </p>
           ) : null}
-          <Button className="mt-auth-submit-top w-ghost-button-width" disabled={!isValid} type="submit">
+          <Button
+            aria-busy={isLoading}
+            className="mt-auth-submit-top w-ghost-button-width"
+            disabled={!isValid || isLoading}
+            type="submit"
+          >
             Create account
           </Button>
           <Button asChild className="mt-auth-link-top" variant="ghost">
