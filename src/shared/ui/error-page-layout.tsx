@@ -27,7 +27,7 @@ export function ErrorPageLayout({
 }: ErrorPageLayoutProps) {
   return (
     <main className="flex min-h-screen items-center justify-center px-error-page-inline">
-      <Empty className="min-h-0 w-full max-w-error-content-width flex-none gap-error-content-gap p-0 md:min-h-error-content-height md:p-0">
+      <Empty className="min-h-error-content-height w-full max-w-error-content-width flex-none gap-error-content-gap p-0">
         <EmptyHeader className="w-full max-w-error-content-width gap-error-header-gap">
           <EmptyMedia className="mb-0">{icon}</EmptyMedia>
           <EmptyTitle className="text-error-title leading-error-title">{title}</EmptyTitle>

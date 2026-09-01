@@ -11,7 +11,7 @@ export interface AuthPageLayoutProps {
 
 export function AuthPageLayout({ activeTab, children, contentClassName }: AuthPageLayoutProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center bg-background px-auth-page-inline pb-auth-page-bottom pt-auth-page-top text-foreground sm:pt-auth-page-top-tablet">
+    <main className="flex min-h-screen flex-col items-center bg-background px-auth-page-inline pb-auth-page-bottom pt-auth-page-top-tablet text-foreground">
       {activeTab ? <AuthTabs activeTab={activeTab} /> : null}
 
       <section
