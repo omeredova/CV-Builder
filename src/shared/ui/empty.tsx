@@ -8,7 +8,7 @@ export function Empty({ className, ...props }: EmptyProps) {
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg p-6 text-center md:p-12",
+        "flex min-w-0 flex-1 flex-col items-center justify-center gap-6 rounded-lg p-12 text-center",
         className,
       )}
       data-slot="empty"

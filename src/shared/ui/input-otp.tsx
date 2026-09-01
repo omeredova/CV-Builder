@@ -24,7 +24,7 @@ export function InputOTP({
 }
 
 export function InputOTPGroup({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("flex items-center gap-3 sm:gap-4", className)} {...props} />;
+  return <div className={cn("flex items-center gap-4", className)} {...props} />;
 }
 
 export interface InputOTPSlotProps extends ComponentProps<"div"> {
