@@ -5,7 +5,7 @@ export function createServerApolloClient() {
     cache: new InMemoryCache(),
     link: new HttpLink({
       fetchOptions: { cache: "no-store" },
-      uri: process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "http://localhost:4000/graphql",
+      uri: process.env.VITE_GRAPHQL_URL,
     }),
   });
 }

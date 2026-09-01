@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/shared/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
 
+import { useEmailVerification } from "../model/useEmailVerification";
 import { VERIFICATION_CODE_LENGTH, validateVerificationCode } from "../model/validation";
+import type { VerificationError } from "../model/verificationError";
 import { AuthFormCard } from "../../ui/AuthFormCard";
-
-export type VerificationError = "expired" | "invalid" | "server";
 
 export interface EmailVerificationFormProps {
   verificationError?: VerificationError;
@@ -22,18 +23,30 @@ const VERIFICATION_ERROR_MESSAGES: Record<VerificationError, string> = {
 };
 
 export function EmailVerificationForm({ verificationError }: EmailVerificationFormProps) {
+  const router = useRouter();
   const [code, setCode] = useState("");
   const [touched, setTouched] = useState(false);
+  const { clearError, error: requestError, isLoading, verifyEmail } = useEmailVerification();
   const validationError = validateVerificationCode(code);
   const error = touched ? validationError : undefined;
+  const displayedVerificationError = requestError ?? verificationError;
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setTouched(true);
+
+    if (validationError || isLoading) {
+      return;
+    }
+
+    if (await verifyEmail(code)) {
+      router.push("/");
+    }
   }
 
   function handleChange(nextCode: string): void {
     setCode(nextCode);
+    clearError();
   }
 
   return (
@@ -71,12 +84,17 @@ export function EmailVerificationForm({ verificationError }: EmailVerificationFo
             {error}
           </p>
         ) : null}
-        {verificationError ? (
+        {displayedVerificationError ? (
           <p className="mt-3 text-center text-xs text-primary" role="alert">
-            {VERIFICATION_ERROR_MESSAGES[verificationError]}
+            {VERIFICATION_ERROR_MESSAGES[displayedVerificationError]}
           </p>
         ) : null}
-        <Button className="mt-10" disabled={Boolean(validationError)} type="submit">
+        <Button
+          aria-busy={isLoading}
+          className="mt-10"
+          disabled={Boolean(validationError) || isLoading}
+          type="submit"
+        >
           Confirm
         </Button>
         <Button asChild className="mt-auth-link-top" variant="ghost">
