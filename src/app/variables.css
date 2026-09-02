@@ -19,6 +19,19 @@
   --primary-active: #e9b0b0;
   --on-primary: #f5f5f7;
 
+  /* Application sidebar */
+  --sidebar: #f5f5f7;
+  --sidebar-foreground: #2e2e2e;
+  --sidebar-primary: #c63031;
+  --sidebar-primary-foreground: #f5f5f7;
+  --sidebar-accent: #e2e2e4;
+  --sidebar-accent-foreground: #2e2e2e;
+  --sidebar-border: #e2e2e4;
+  --sidebar-ring: #c63031;
+  --sidebar-muted: #626262;
+  --sidebar-logo: #2e2e2e;
+  --sidebar-logo-foreground: #f5f5f7;
+
   /* Feedback */
   --loader-overlay: rgb(18, 18, 18, 60%);
   --loader-track: rgb(245, 245, 247, 30%);
@@ -45,6 +58,17 @@
   --color-primary: var(--primary);
   --color-primary-active: var(--primary-active);
   --color-on-primary: var(--on-primary);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-logo: var(--sidebar-logo);
+  --color-sidebar-logo-foreground: var(--sidebar-logo-foreground);
   --color-loader-overlay: var(--loader-overlay);
   --color-loader-track: var(--loader-track);
 
@@ -52,6 +76,9 @@
   --font-sans: "Roboto", Arial, sans-serif;
   --text-error-title: 2.125rem;
   --leading-error-title: 1.25;
+  --text-page-title: 0.875rem;
+  --text-sidebar-item: 1rem;
+  --tracking-sidebar: 0.009375rem;
 
   /* Control dimensions */
   --spacing-control-height: 3rem;
@@ -62,6 +89,30 @@
   --spacing-field-width: 25rem;
   --spacing-loader-indicator: 6rem;
   --spacing-loader-stroke: 0.5rem;
+  --spacing-sidebar-width: 12.5rem;
+  --spacing-sidebar-collapsed: 3.5rem;
+  --spacing-sidebar-header: 3.5rem;
+  --spacing-sidebar-inline: 0.5rem;
+  --spacing-sidebar-menu: 0.875rem;
+  --spacing-sidebar-item-height: 3.5rem;
+  --spacing-sidebar-item-inline: 0.875rem;
+  --spacing-sidebar-item-gap: 0.75rem;
+  --spacing-sidebar-icon: 1.5rem;
+  --spacing-sidebar-footer: 3.5rem;
+  --spacing-sidebar-footer-bottom: 3.5rem;
+  --spacing-sidebar-footer-total: 7rem;
+  --spacing-sidebar-profile: 0.75rem;
+  --spacing-sidebar-logo: 0.75rem;
+  --spacing-sidebar-logo-mark: 1.5rem;
+  --spacing-sidebar-toggle: 0.875rem;
+  --spacing-sidebar-toggle-offset: 0.4375rem;
+  --spacing-sidebar-toggle-icon-width: 0.463125rem;
+  --spacing-sidebar-toggle-icon-height: 0.75rem;
+  --spacing-sidebar-collapsed-logo: 1rem;
+  --spacing-sidebar-collapsed-item: 1.25rem;
+  --spacing-avatar: 2.5rem;
+  --spacing-page-inline: 2rem;
+  --spacing-page-block: 1rem;
 
   /* Layering */
   --z-index-api-loader: 50;
@@ -105,11 +156,15 @@
 
   /* Shape and elevation */
   --radius-control: 2.5rem;
+  --radius-sidebar-item: 12.5rem;
+
+  /* Motion */
+  --transition-duration-sidebar: 200ms;
   --shadow-control-active: var(--control-shadow);
   --shadow-primary: var(--primary-shadow);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     /* Surfaces and content */
     --background: #2e2e2e;
@@ -122,6 +177,14 @@
     --placeholder: #626262;
     --password-icon: #aeaeae;
     --border: #aeaeae;
+
+    --sidebar: #2e2e2e;
+    --sidebar-foreground: #f5f5f7;
+    --sidebar-accent: #454545;
+    --sidebar-accent-foreground: #f5f5f7;
+    --sidebar-muted: #c4c4c6;
+    --sidebar-logo: #f5f5f7;
+    --sidebar-logo-foreground: #2e2e2e;
 
     --loader-overlay: rgb(18, 18, 18, 60%);
     --loader-track: rgb(245, 245, 247, 30%);
