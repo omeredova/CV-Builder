@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
 
 import { AUTH_SERVER_ERROR_MESSAGE } from "../../model/authError";
@@ -31,6 +32,7 @@ const PASSWORD_RESET_ERROR_MESSAGES: Record<PasswordResetError, string> = {
 
 export function PasswordResetForm({ resetError, token }: PasswordResetFormProps) {
   const router = useRouter();
+  const holdLoaderForNavigation = useApiLoaderNavigation();
   const [values, setValues] = useState<PasswordConfirmationValues>(INITIAL_VALUES);
   const [touched, setTouched] = useState<
     Partial<Record<keyof PasswordConfirmationValues, boolean>>
@@ -58,6 +60,7 @@ export function PasswordResetForm({ resetError, token }: PasswordResetFormProps)
     }
 
     if (await resetPassword(values, token)) {
+      holdLoaderForNavigation();
       router.push("/");
     }
   }

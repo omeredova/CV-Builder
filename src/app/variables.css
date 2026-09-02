@@ -19,6 +19,10 @@
   --primary-active: #e9b0b0;
   --on-primary: #f5f5f7;
 
+  /* Feedback */
+  --loader-overlay: rgb(18, 18, 18, 60%);
+  --loader-track: rgb(245, 245, 247, 30%);
+
   /* Elevation */
   --control-shadow: 0 4px 4px rgb(0 0 0 / 25%);
   --primary-shadow: 0 1px 5px 0 rgb(0 0 0 / 12%), 0 2px 2px 0 rgb(0 0 0 / 14%),
@@ -41,6 +45,8 @@
   --color-primary: var(--primary);
   --color-primary-active: var(--primary-active);
   --color-on-primary: var(--on-primary);
+  --color-loader-overlay: var(--loader-overlay);
+  --color-loader-track: var(--loader-track);
 
   /* Typography */
   --font-sans: "Roboto", Arial, sans-serif;
@@ -54,6 +60,11 @@
   --spacing-password-recovery-button-width: 13.75rem;
   --spacing-password-reset-button-width: 7.5rem;
   --spacing-field-width: 25rem;
+  --spacing-loader-indicator: 6rem;
+  --spacing-loader-stroke: 0.5rem;
+
+  /* Layering */
+  --z-index-api-loader: 50;
 
   /* Error page layout */
   --spacing-error-page-inline: 1.5rem;
@@ -111,5 +122,8 @@
     --placeholder: #626262;
     --password-icon: #aeaeae;
     --border: #aeaeae;
+
+    --loader-overlay: rgb(18, 18, 18, 60%);
+    --loader-track: rgb(245, 245, 247, 30%);
   }
 }

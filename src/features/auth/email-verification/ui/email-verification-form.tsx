@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
+import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
 
@@ -26,6 +27,7 @@ const VERIFICATION_ERROR_MESSAGES: Record<VerificationError, string> = {
 
 export function EmailVerificationForm({ verificationError }: EmailVerificationFormProps) {
   const router = useRouter();
+  const holdLoaderForNavigation = useApiLoaderNavigation();
   const [code, setCode] = useState("");
   const [touched, setTouched] = useState(false);
   const { clearError, error: requestError, isLoading, verifyEmail } = useEmailVerification();
@@ -42,6 +44,7 @@ export function EmailVerificationForm({ verificationError }: EmailVerificationFo
     }
 
     if (await verifyEmail(code)) {
+      holdLoaderForNavigation();
       router.push("/");
     }
   }
