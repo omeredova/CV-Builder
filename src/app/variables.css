@@ -76,7 +76,8 @@
   --font-sans: "Roboto", Arial, sans-serif;
   --text-error-title: 2.125rem;
   --leading-error-title: 1.25;
-  --text-page-title: 0.875rem;
+  --text-page-title: 1rem;
+  --leading-page-title: 1.5rem;
   --text-sidebar-item: 1rem;
   --tracking-sidebar: 0.009375rem;
 
