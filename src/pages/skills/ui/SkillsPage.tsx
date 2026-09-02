@@ -1,3 +1,5 @@
+import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
+
 export function SkillsPage() {
-  return <h1 className="text-page-title font-normal text-muted-foreground">Skills</h1>;
+  return <AppBreadcrumb pageName="Skills" />;
 }

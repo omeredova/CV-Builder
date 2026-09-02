@@ -42,7 +42,7 @@ export function AppSidebar() {
           <CvBuilderLogo className="size-sidebar-logo-mark shrink-0" />
           <span
             className={cn(
-              "font-medium transition-opacity duration-sidebar",
+              "leading-page-title font-medium transition-opacity duration-sidebar",
               isCollapsed && "opacity-0",
             )}
           >
