@@ -47,9 +47,31 @@ export function SidebarMenuItem({ className, ...props }: ComponentProps<"li">) {
   return <li className={cn("relative", className)} {...props} />;
 }
 
-interface SidebarMenuButtonProps extends ComponentProps<"button"> {
+export interface SidebarMenuButtonProps extends ComponentProps<"button"> {
   asChild?: boolean;
   isActive?: boolean;
+}
+
+export interface SidebarFooterMenuButtonProps extends SidebarMenuButtonProps {
+  isCollapsed?: boolean;
+}
+
+export function SidebarFooterMenuButton({
+  className,
+  isCollapsed = false,
+  ...props
+}: SidebarFooterMenuButtonProps) {
+  return (
+    <SidebarMenuButton
+      className={cn(
+        "!h-sidebar-footer-menu-item !gap-sidebar-footer-menu-content !rounded-none !px-sidebar-footer-menu-inline !text-sidebar-item leading-normal tracking-normal text-sidebar-foreground hover:!rounded-none [&>svg]:!size-sidebar-footer-menu-icon [&>svg]:!text-sidebar-foreground",
+        isCollapsed &&
+          "!gap-0 !rounded-l-none !rounded-r-sidebar-item !px-0 justify-center [&>span]:sr-only [&>svg]:!size-sidebar-icon",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function SidebarMenuButton({
