@@ -15,13 +15,13 @@ export function AuthTabs({ activeTab }: AuthTabsProps) {
         <TabsTrigger active={activeTab === "signIn"} asChild>
           <Link
             aria-current={activeTab === "signIn" ? "page" : undefined}
-            href="/account/login"
+            href="/login"
           >
             Sign in
           </Link>
         </TabsTrigger>
         <TabsTrigger active={activeTab === "signUp"} asChild>
-          <Link aria-current={activeTab === "signUp" ? "page" : undefined} href="/account/register">
+          <Link aria-current={activeTab === "signUp" ? "page" : undefined} href="/register">
             Sign up
           </Link>
         </TabsTrigger>

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { HomePage } from "@/pages/home";
 
 export default function Home() {
-  redirect("/account/login");
+  return <HomePage />;
 }

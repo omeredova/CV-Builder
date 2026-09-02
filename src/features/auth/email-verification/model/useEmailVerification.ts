@@ -1,9 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useState } from "react";
 
+import { getErrorMessage } from "../../model/authError";
 import { getAccessToken, isVerificationSessionExpired } from "../../model/authSession";
+import {
+  type AuthRequestState,
+  useRequestError,
+} from "../../model/useRequestError";
 import {
   verifyMailMutation,
   type VerifyMailMutationData,
@@ -11,15 +15,12 @@ import {
 } from "../api/verifyMailMutation";
 import type { VerificationError } from "./verificationError";
 
-export interface UseEmailVerificationResult {
-  clearError: () => void;
-  error?: VerificationError;
-  isLoading: boolean;
+export interface UseEmailVerificationResult extends AuthRequestState<VerificationError> {
   verifyEmail: (code: string) => Promise<boolean>;
 }
 
 export function getVerificationError(error: unknown): VerificationError {
-  const message = error instanceof Error ? error.message : "";
+  const message = getErrorMessage(error);
 
   if (
     message.includes("actionExpired") ||
@@ -35,14 +36,14 @@ export function getVerificationError(error: unknown): VerificationError {
 }
 
 export function useEmailVerification(): UseEmailVerificationResult {
-  const [error, setError] = useState<VerificationError>();
+  const { clearError, error, setError } = useRequestError<VerificationError>();
   const [executeVerification, { loading }] = useMutation<
     VerifyMailMutationData,
     VerifyMailMutationVariables
   >(verifyMailMutation);
 
   async function verifyEmail(code: string): Promise<boolean> {
-    setError(undefined);
+    clearError();
 
     if (isVerificationSessionExpired()) {
       setError("expired");
@@ -66,7 +67,7 @@ export function useEmailVerification(): UseEmailVerificationResult {
   }
 
   return {
-    clearError: () => setError(undefined),
+    clearError,
     error,
     isLoading: loading,
     verifyEmail,

@@ -1,9 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useState } from "react";
 
-import { saveAuthSession, startVerificationSession } from "../../model/authSession";
+import { getErrorMessage } from "../../model/authError";
+import { saveAuthPayload, startVerificationSession } from "../../model/authSession";
+import {
+  type AuthRequestState,
+  useRequestError,
+} from "../../model/useRequestError";
 import {
   signUpMutation,
   type SignUpMutationData,
@@ -12,28 +16,25 @@ import {
 import type { RegistrationError } from "./registrationError";
 import type { SignUpValues } from "./validation";
 
-export interface UseSignUpResult {
-  clearError: () => void;
-  error?: RegistrationError;
-  isLoading: boolean;
+export interface UseSignUpResult extends AuthRequestState<RegistrationError> {
   signUp: (values: SignUpValues) => Promise<boolean>;
 }
 
 export function getRegistrationError(error: unknown): RegistrationError {
-  return error instanceof Error && error.message.includes("userAlreadyExists")
+  return getErrorMessage(error).includes("userAlreadyExists")
     ? "emailExists"
     : "server";
 }
 
 export function useSignUp(): UseSignUpResult {
-  const [error, setError] = useState<RegistrationError>();
+  const { clearError, error, setError } = useRequestError<RegistrationError>();
   const [executeSignUp, { loading }] = useMutation<
     SignUpMutationData,
     SignUpMutationVariables
   >(signUpMutation);
 
   async function signUp(values: SignUpValues): Promise<boolean> {
-    setError(undefined);
+    clearError();
 
     try {
       const result = await executeSignUp({ variables: { auth: values } });
@@ -43,10 +44,7 @@ export function useSignUp(): UseSignUpResult {
         throw new Error("missingSignUpData");
       }
 
-      saveAuthSession({
-        accessToken: auth.access_token,
-        refreshToken: auth.refresh_token,
-      });
+      saveAuthPayload(auth);
       startVerificationSession();
       return true;
     } catch (requestError: unknown) {
@@ -56,7 +54,7 @@ export function useSignUp(): UseSignUpResult {
   }
 
   return {
-    clearError: () => setError(undefined),
+    clearError,
     error,
     isLoading: loading,
     signUp,

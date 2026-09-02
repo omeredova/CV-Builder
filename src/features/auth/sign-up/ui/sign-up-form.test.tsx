@@ -81,7 +81,7 @@ describe("SignUpForm", () => {
       email: "user@example.com",
       password: "123456",
     });
-    expect(push).toHaveBeenCalledWith("/account/verify-email");
+    expect(push).toHaveBeenCalledWith("/verify-email");
   });
 
   it("shows a duplicate-email error and keeps the entered values", async () => {

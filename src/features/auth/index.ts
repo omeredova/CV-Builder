@@ -4,7 +4,11 @@ export {
   type VerificationError,
 } from "./email-verification";
 export { AuthTabs, type AuthTab, type AuthTabsProps } from "./navigation";
-export { PasswordRecoveryForm } from "./password-recovery";
+export {
+  PasswordRecoveryForm,
+  type PasswordRecoveryError,
+  type PasswordRecoveryFormProps,
+} from "./password-recovery";
 export {
   PasswordResetForm,
   type PasswordResetError,

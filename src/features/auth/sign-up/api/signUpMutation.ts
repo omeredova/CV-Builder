@@ -1,13 +1,9 @@
 import { gql } from "@apollo/client";
 
+import type { AuthPayload } from "../../model/authSession";
+
 export interface SignUpMutationData {
-  signup: {
-    access_token: string;
-    refresh_token: string;
-    user: {
-      id: string;
-    };
-  };
+  signup: AuthPayload;
 }
 
 export interface SignUpMutationVariables {

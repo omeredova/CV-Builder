@@ -1,9 +1,13 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { useState } from "react";
 
-import { saveAuthSession } from "../../model/authSession";
+import { getErrorMessage } from "../../model/authError";
+import { saveAuthPayload } from "../../model/authSession";
+import {
+  type AuthRequestState,
+  useRequestError,
+} from "../../model/useRequestError";
 import {
   signInMutation,
   type SignInMutationData,
@@ -12,28 +16,25 @@ import {
 import type { AuthenticationError } from "./authenticationError";
 import type { SignInValues } from "./validation";
 
-export interface UseSignInResult {
-  clearError: () => void;
-  error?: AuthenticationError;
-  isLoading: boolean;
+export interface UseSignInResult extends AuthRequestState<AuthenticationError> {
   signIn: (values: SignInValues) => Promise<boolean>;
 }
 
 export function getAuthenticationError(error: unknown): AuthenticationError {
-  return error instanceof Error && error.message.includes("invalidCredentials")
+  return getErrorMessage(error).includes("invalidCredentials")
     ? "invalidCredentials"
     : "server";
 }
 
 export function useSignIn(): UseSignInResult {
-  const [error, setError] = useState<AuthenticationError>();
+  const { clearError, error, setError } = useRequestError<AuthenticationError>();
   const [executeSignIn, { loading }] = useMutation<
     SignInMutationData,
     SignInMutationVariables
   >(signInMutation);
 
   async function signIn(values: SignInValues): Promise<boolean> {
-    setError(undefined);
+    clearError();
 
     try {
       const result = await executeSignIn({ variables: { auth: values } });
@@ -43,10 +44,7 @@ export function useSignIn(): UseSignInResult {
         throw new Error("missingSignInData");
       }
 
-      saveAuthSession({
-        accessToken: auth.access_token,
-        refreshToken: auth.refresh_token,
-      });
+      saveAuthPayload(auth);
       return true;
     } catch (requestError: unknown) {
       setError(getAuthenticationError(requestError));
@@ -55,7 +53,7 @@ export function useSignIn(): UseSignInResult {
   }
 
   return {
-    clearError: () => setError(undefined),
+    clearError,
     error,
     isLoading: loading,
     signIn,

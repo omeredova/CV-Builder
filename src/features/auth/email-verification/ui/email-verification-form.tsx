@@ -7,10 +7,12 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/shared/ui/input-otp";
 
+import { AUTH_SERVER_ERROR_MESSAGE } from "../../model/authError";
 import { useEmailVerification } from "../model/useEmailVerification";
 import { VERIFICATION_CODE_LENGTH, validateVerificationCode } from "../model/validation";
 import type { VerificationError } from "../model/verificationError";
 import { AuthFormCard } from "../../ui/AuthFormCard";
+import { AuthFormMessage } from "../../ui/AuthFormMessage";
 
 export interface EmailVerificationFormProps {
   verificationError?: VerificationError;
@@ -19,7 +21,7 @@ export interface EmailVerificationFormProps {
 const VERIFICATION_ERROR_MESSAGES: Record<VerificationError, string> = {
   expired: "Verification code has expired",
   invalid: "Invalid verification code",
-  server: "Something went wrong. Please try again later",
+  server: AUTH_SERVER_ERROR_MESSAGE,
 };
 
 export function EmailVerificationForm({ verificationError }: EmailVerificationFormProps) {
@@ -75,20 +77,15 @@ export function EmailVerificationForm({ verificationError }: EmailVerificationFo
             ))}
           </InputOTPGroup>
         </InputOTP>
-        {error ? (
-          <p
-            className="mt-field-message-top text-center text-xs text-primary"
-            id="verification-code-error"
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
-        {displayedVerificationError ? (
-          <p className="mt-3 text-center text-xs text-primary" role="alert">
-            {VERIFICATION_ERROR_MESSAGES[displayedVerificationError]}
-          </p>
-        ) : null}
+        <AuthFormMessage id="verification-code-error" message={error} />
+        <AuthFormMessage
+          className="mt-3"
+          message={
+            displayedVerificationError
+              ? VERIFICATION_ERROR_MESSAGES[displayedVerificationError]
+              : undefined
+          }
+        />
         <Button
           aria-busy={isLoading}
           className="mt-10"

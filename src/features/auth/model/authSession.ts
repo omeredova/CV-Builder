@@ -9,9 +9,24 @@ export interface AuthSession {
   refreshToken: string;
 }
 
+export interface AuthPayload {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+  };
+}
+
 export function saveAuthSession({ accessToken, refreshToken }: AuthSession): void {
   sessionStorage.setItem(accessTokenKey, accessToken);
   sessionStorage.setItem(refreshTokenKey, refreshToken);
+}
+
+export function saveAuthPayload(payload: AuthPayload): void {
+  saveAuthSession({
+    accessToken: payload.access_token,
+    refreshToken: payload.refresh_token,
+  });
 }
 
 export function startVerificationSession(): void {
