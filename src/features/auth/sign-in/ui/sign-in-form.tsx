@@ -7,10 +7,12 @@ import { type FormEvent, useMemo, useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
+import { AUTH_SERVER_ERROR_MESSAGE } from "../../model/authError";
 import type { AuthenticationError } from "../model/authenticationError";
 import { useSignIn } from "../model/useSignIn";
 import { type SignInValues, validateSignIn } from "../model/validation";
 import { AuthFormCard } from "../../ui/AuthFormCard";
+import { AuthFormMessage } from "../../ui/AuthFormMessage";
 
 export interface SignInFormProps {
   authenticationError?: AuthenticationError;
@@ -20,7 +22,7 @@ const INITIAL_VALUES: SignInValues = { email: "", password: "" };
 
 const AUTHENTICATION_ERROR_MESSAGES: Record<AuthenticationError, string> = {
   invalidCredentials: "Invalid email or password",
-  server: "Something went wrong. Please try again later.",
+  server: AUTH_SERVER_ERROR_MESSAGE,
 };
 
 export function SignInForm({ authenticationError }: SignInFormProps) {
@@ -88,11 +90,13 @@ export function SignInForm({ authenticationError }: SignInFormProps) {
               value={values.password}
             />
           </div>
-          {displayedAuthenticationError ? (
-            <p className="mt-field-message-top text-center text-xs text-primary" role="alert">
-              {AUTHENTICATION_ERROR_MESSAGES[displayedAuthenticationError]}
-            </p>
-          ) : null}
+          <AuthFormMessage
+            message={
+              displayedAuthenticationError
+                ? AUTHENTICATION_ERROR_MESSAGES[displayedAuthenticationError]
+                : undefined
+            }
+          />
           <Button
             aria-busy={isLoading}
             className="mt-auth-submit-top"
@@ -102,7 +106,7 @@ export function SignInForm({ authenticationError }: SignInFormProps) {
             Sign in
           </Button>
           <Button asChild className="mt-auth-link-top" variant="ghost">
-            <Link href="/account/recover-password">Forgot password</Link>
+            <Link href="/recover-password">Forgot password</Link>
           </Button>
       </form>
     </AuthFormCard>

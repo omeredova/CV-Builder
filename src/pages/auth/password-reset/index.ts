@@ -1,1 +1,4 @@
-export { PasswordResetPage } from "./ui/PasswordResetPage";
+export {
+  PasswordResetPage,
+  type PasswordResetPageProps,
+} from "./ui/PasswordResetPage";

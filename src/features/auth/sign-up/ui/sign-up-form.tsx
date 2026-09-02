@@ -7,10 +7,13 @@ import { type FormEvent, useMemo, useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
+import { AUTH_SERVER_ERROR_MESSAGE } from "../../model/authError";
 import type { RegistrationError } from "../model/registrationError";
 import { useSignUp } from "../model/useSignUp";
 import { type SignUpValues, validateSignUp } from "../model/validation";
 import { AuthFormCard } from "../../ui/AuthFormCard";
+import { AuthFormMessage } from "../../ui/AuthFormMessage";
+import { PasswordConfirmationFields } from "../../ui/PasswordConfirmationFields";
 
 export interface SignUpFormProps {
   registrationError?: RegistrationError;
@@ -20,15 +23,13 @@ const INITIAL_VALUES: SignUpValues = { email: "", password: "", confirmPassword:
 
 const REGISTRATION_ERROR_MESSAGES: Record<RegistrationError, string> = {
   emailExists: "An account with this email already exists",
-  server: "Something went wrong. Please try again later",
+  server: AUTH_SERVER_ERROR_MESSAGE,
 };
 
 export function SignUpForm({ registrationError }: SignUpFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignUpValues>(INITIAL_VALUES);
   const [touched, setTouched] = useState<Partial<Record<keyof SignUpValues, boolean>>>({});
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const { clearError, error: requestError, isLoading, signUp } = useSignUp();
   const errors = useMemo(() => validateSignUp(values), [values]);
   const isValid = Object.keys(errors).length === 0;
@@ -52,7 +53,7 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
     }
 
     if (await signUp(values)) {
-      router.push("/account/verify-email");
+      router.push("/verify-email");
     }
   }
 
@@ -72,46 +73,21 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
               required
               value={values.email}
             />
-            <FormField
-              autoComplete="new-password"
-              error={touched.password ? errors.password : undefined}
-              id="password"
-              label="Password"
-              minLength={6}
-              onBlur={() => touchField("password")}
-              onChange={(event) => updateField("password", event.target.value)}
-              onPasswordVisibilityToggle={() => setPasswordVisible((visible) => !visible)}
-              passwordIcon
-              passwordVisible={passwordVisible}
-              placeholder="Password"
-              required
-              type={passwordVisible ? "text" : "password"}
-              value={values.password}
-            />
-            <FormField
-              autoComplete="new-password"
-              error={touched.confirmPassword ? errors.confirmPassword : undefined}
-              id="confirm-password"
-              label="Confirm Password"
-              minLength={6}
-              onBlur={() => touchField("confirmPassword")}
-              onChange={(event) => updateField("confirmPassword", event.target.value)}
-              onPasswordVisibilityToggle={() =>
-                setConfirmPasswordVisible((visible) => !visible)
-              }
-              passwordIcon
-              passwordVisible={confirmPasswordVisible}
-              placeholder="Confirm Password"
-              required
-              type={confirmPasswordVisible ? "text" : "password"}
-              value={values.confirmPassword}
+            <PasswordConfirmationFields
+              errors={errors}
+              onBlur={touchField}
+              onChange={updateField}
+              touched={touched}
+              values={values}
             />
           </div>
-          {displayedRegistrationError ? (
-            <p className="mt-field-message-top text-center text-xs text-primary" role="alert">
-              {REGISTRATION_ERROR_MESSAGES[displayedRegistrationError]}
-            </p>
-          ) : null}
+          <AuthFormMessage
+            message={
+              displayedRegistrationError
+                ? REGISTRATION_ERROR_MESSAGES[displayedRegistrationError]
+                : undefined
+            }
+          />
           <Button
             aria-busy={isLoading}
             className="mt-auth-submit-top w-ghost-button-width"
@@ -121,7 +97,7 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
             Create account
           </Button>
           <Button asChild className="mt-auth-link-top" variant="ghost">
-            <Link href="/account/login">I have an account</Link>
+            <Link href="/login">I have an account</Link>
           </Button>
       </form>
     </AuthFormCard>
