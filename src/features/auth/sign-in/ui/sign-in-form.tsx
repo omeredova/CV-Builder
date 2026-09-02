@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
@@ -27,6 +28,7 @@ const AUTHENTICATION_ERROR_MESSAGES: Record<AuthenticationError, string> = {
 
 export function SignInForm({ authenticationError }: SignInFormProps) {
   const router = useRouter();
+  const holdLoaderForNavigation = useApiLoaderNavigation();
   const [values, setValues] = useState<SignInValues>(INITIAL_VALUES);
   const [touched, setTouched] = useState<Partial<Record<keyof SignInValues, boolean>>>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -53,6 +55,7 @@ export function SignInForm({ authenticationError }: SignInFormProps) {
     }
 
     if (await signIn(values)) {
+      holdLoaderForNavigation();
       router.push("/");
     }
   }

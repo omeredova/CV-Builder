@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
@@ -25,6 +26,7 @@ const PASSWORD_RECOVERY_ERROR_MESSAGES: Record<PasswordRecoveryError, string> = 
 
 export function PasswordRecoveryForm({ recoveryError }: PasswordRecoveryFormProps) {
   const router = useRouter();
+  const holdLoaderForNavigation = useApiLoaderNavigation();
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
   const { clearError, error: requestError, isLoading, requestPasswordReset } =
@@ -42,6 +44,7 @@ export function PasswordRecoveryForm({ recoveryError }: PasswordRecoveryFormProp
     }
 
     if (await requestPasswordReset({ email })) {
+      holdLoaderForNavigation();
       router.push("/login");
     }
   }

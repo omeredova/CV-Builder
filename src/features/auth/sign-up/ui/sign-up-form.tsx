@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useMemo, useState } from "react";
 
+import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
 import { FormField } from "@/shared/ui/form-field";
 
@@ -28,6 +29,7 @@ const REGISTRATION_ERROR_MESSAGES: Record<RegistrationError, string> = {
 
 export function SignUpForm({ registrationError }: SignUpFormProps) {
   const router = useRouter();
+  const holdLoaderForNavigation = useApiLoaderNavigation();
   const [values, setValues] = useState<SignUpValues>(INITIAL_VALUES);
   const [touched, setTouched] = useState<Partial<Record<keyof SignUpValues, boolean>>>({});
   const { clearError, error: requestError, isLoading, signUp } = useSignUp();
@@ -53,6 +55,7 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
     }
 
     if (await signUp(values)) {
+      holdLoaderForNavigation();
       router.push("/verify-email");
     }
   }
