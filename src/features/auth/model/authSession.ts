@@ -37,6 +37,12 @@ export function getAccessToken(): string | null {
   return sessionStorage.getItem(accessTokenKey);
 }
 
+export function clearAuthSession(): void {
+  sessionStorage.removeItem(accessTokenKey);
+  sessionStorage.removeItem(refreshTokenKey);
+  sessionStorage.removeItem(verificationStartedAtKey);
+}
+
 export function isVerificationSessionExpired(): boolean {
   const startedAt = sessionStorage.getItem(verificationStartedAtKey);
 

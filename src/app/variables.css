@@ -27,6 +27,7 @@
   --sidebar-accent: #e2e2e4;
   --sidebar-accent-foreground: #2e2e2e;
   --sidebar-border: #e2e2e4;
+  --sidebar-footer-menu-border: #aeaeae;
   --sidebar-ring: #c63031;
   --sidebar-muted: #626262;
   --sidebar-logo: #2e2e2e;
@@ -65,6 +66,7 @@
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-footer-menu-border: var(--sidebar-footer-menu-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-logo: var(--sidebar-logo);
@@ -102,6 +104,13 @@
   --spacing-sidebar-footer: 3.5rem;
   --spacing-sidebar-footer-bottom: 3.5rem;
   --spacing-sidebar-footer-total: 7rem;
+  --spacing-sidebar-footer-menu-height: 7.5625rem;
+  --spacing-sidebar-footer-menu-item: 2.5rem;
+  --spacing-sidebar-footer-menu-icon: 1rem;
+  --spacing-sidebar-footer-menu-content: 1.25rem;
+  --spacing-sidebar-footer-menu-inline: 0.75rem;
+  --spacing-sidebar-footer-menu-block: 0.03125rem;
+  --spacing-sidebar-footer-menu-divider: 5rem;
   --spacing-sidebar-profile: 0.75rem;
   --spacing-sidebar-logo: 0.75rem;
   --spacing-sidebar-logo-mark: 1.5rem;
@@ -158,6 +167,7 @@
   /* Shape and elevation */
   --radius-control: 2.5rem;
   --radius-sidebar-item: 12.5rem;
+  --radius-sidebar-footer-menu: 0.5rem;
 
   /* Motion */
   --transition-duration-sidebar: 200ms;
@@ -165,7 +175,7 @@
   --shadow-primary: var(--primary-shadow);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
     /* Surfaces and content */
     --background: #2e2e2e;
@@ -183,6 +193,7 @@
     --sidebar-foreground: #f5f5f7;
     --sidebar-accent: #454545;
     --sidebar-accent-foreground: #f5f5f7;
+    --sidebar-footer-menu-border: #626262;
     --sidebar-muted: #c4c4c6;
     --sidebar-logo: #f5f5f7;
     --sidebar-logo-foreground: #2e2e2e;

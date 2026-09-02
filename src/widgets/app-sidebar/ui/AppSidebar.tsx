@@ -1,17 +1,33 @@
 "use client";
 
-import { FileUser, Languages, TrendingUp, UsersRound } from "lucide-react";
+import {
+  FileUser,
+  Languages,
+  Settings,
+  TrendingUp,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { SignOutButton } from "@/features/auth";
 import { cn } from "@/shared/lib/class-names";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { CvBuilderLogo } from "@/shared/ui/icons/CvBuilderLogo";
 import { SidebarChevronIcon } from "@/shared/ui/icons/SidebarChevronIcon";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooterMenuButton,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
@@ -31,7 +47,7 @@ export function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <Sidebar className="data-[collapsed=true]:w-sidebar-collapsed" data-collapsed={isCollapsed}>
+    <Sidebar className="group/sidebar data-[collapsed=true]:w-sidebar-collapsed" data-collapsed={isCollapsed}>
       <SidebarHeader
         className={cn(
           "transition-[padding] duration-sidebar",
@@ -92,19 +108,55 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex h-sidebar-footer items-center gap-sidebar-profile overflow-hidden whitespace-nowrap">
-          <Avatar aria-label="Name Surname">
-            <AvatarFallback>N</AvatarFallback>
-          </Avatar>
-          <span
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex h-sidebar-footer w-full items-center gap-sidebar-profile overflow-hidden whitespace-nowrap text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              type="button"
+            >
+              <Avatar aria-label="Name Surname">
+                <AvatarFallback>N</AvatarFallback>
+              </Avatar>
+              <span
+                className={cn(
+                  "truncate font-normal transition-opacity duration-sidebar",
+                  isCollapsed && "opacity-0",
+                )}
+              >
+                Name Surname
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent
+            align="start"
+            alignOffset={-8}
             className={cn(
-              "truncate font-normal transition-opacity duration-sidebar",
-              isCollapsed && "opacity-0",
+              "relative h-sidebar-footer-menu-height !gap-0 overflow-hidden rounded-sidebar-footer-menu border border-sidebar-footer-menu-border bg-sidebar-accent py-sidebar-footer-menu-block shadow-none",
+              isCollapsed ? "w-sidebar-collapsed" : "w-sidebar-width",
             )}
+            side="top"
           >
-            Name Surname
-          </span>
-        </div>
+            <DropdownMenuItem asChild>
+              <SidebarFooterMenuButton isCollapsed={isCollapsed}>
+                <UserRound aria-hidden="true" />
+                <span>Profile</span>
+              </SidebarFooterMenuButton>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <SidebarFooterMenuButton asChild isCollapsed={isCollapsed}>
+                <Link href="/settings">
+                  <Settings aria-hidden="true" />
+                  <span>Settings</span>
+                </Link>
+              </SidebarFooterMenuButton>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="absolute inset-x-0 top-sidebar-footer-menu-divider" />
+            <DropdownMenuItem asChild>
+              <SignOutButton isCollapsed={isCollapsed} />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarFooter>
     </Sidebar>
   );
