@@ -22,3 +22,5 @@ export {
 export { SignOutButton, type SignOutButtonProps } from "./sign-out";
 export { SignUpForm, type RegistrationError, type SignUpFormProps } from "./sign-up";
 export { AuthFormCard, type AuthFormCardProps } from "./ui/AuthFormCard";
+export { refreshAccessToken } from "./api/refreshAccessToken";
+export { getAccessToken, logout } from "./model/authSession";

@@ -1,38 +1,65 @@
 :root {
+  /* Primitive palette */
+  --neutral-950: #2e2e2e;
+  --neutral-700: #626262;
+  --neutral-500: #aeaeae;
+  --neutral-300: #c4c4c6;
+  --neutral-200: #e2e2e4;
+  --neutral-50: #f5f5f7;
+  --brand-primary: #c63031;
+  --brand-primary-active: #e9b0b0;
+  --dark-surface-accent: #454545;
+
+  /* Primitive geometry */
+  --compact-control-size: 2.25rem;
+  --control-size: 3rem;
+  --chevron-width: 0.463125rem;
+  --chevron-height: 0.75rem;
+  --medium-icon-size: 1.5rem;
+  --page-inline-space: 1.5rem;
+
   /* Surfaces and content */
-  --background: #f5f5f7;
-  --card: #f5f5f7;
-  --card-foreground: #2e2e2e;
-  --foreground: #2e2e2e;
-  --muted-foreground: #626262;
+  --background: var(--neutral-50);
+  --card: var(--neutral-50);
+  --card-foreground: var(--neutral-950);
+  --foreground: var(--neutral-950);
+  --muted-foreground: var(--neutral-700);
 
   /* Form controls */
-  --border: #aeaeae;
-  --table-border: #aeaeae;
-  --placeholder: #c4c4c6;
-  --password-icon: #626262;
-  --disabled: #aeaeae;
-  --disabled-foreground: #e2e2e4;
-  --input-disabled-background: #c4c4c6;
+  --border: var(--neutral-500);
+  --table-border: var(--neutral-500);
+  --placeholder: var(--neutral-300);
+  --password-icon: var(--neutral-700);
+  --disabled: var(--neutral-500);
+  --disabled-foreground: var(--neutral-200);
+  --input-disabled-background: var(--neutral-300);
+  --employee-avatar: var(--neutral-500);
+  --employee-avatar-foreground: var(--neutral-50);
+  --employee-chevron: var(--neutral-700);
+  --table-search-icon: var(--neutral-700);
+  --table-search-placeholder: var(--neutral-300);
+  --pagination-border: var(--neutral-500);
+  --pagination-icon: var(--neutral-700);
+  --pagination-text: var(--neutral-950);
 
   /* Brand and actions */
-  --primary: #c63031;
-  --primary-active: #e9b0b0;
-  --on-primary: #f5f5f7;
+  --primary: var(--brand-primary);
+  --primary-active: var(--brand-primary-active);
+  --on-primary: var(--neutral-50);
 
   /* Application sidebar */
-  --sidebar: #f5f5f7;
-  --sidebar-foreground: #2e2e2e;
-  --sidebar-primary: #c63031;
-  --sidebar-primary-foreground: #f5f5f7;
-  --sidebar-accent: #e2e2e4;
-  --sidebar-accent-foreground: #2e2e2e;
-  --sidebar-border: #e2e2e4;
-  --sidebar-footer-menu-border: #aeaeae;
-  --sidebar-ring: #c63031;
-  --sidebar-muted: #626262;
-  --sidebar-logo: #2e2e2e;
-  --sidebar-logo-foreground: #f5f5f7;
+  --sidebar: var(--neutral-50);
+  --sidebar-foreground: var(--neutral-950);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: var(--neutral-50);
+  --sidebar-accent: var(--neutral-200);
+  --sidebar-accent-foreground: var(--neutral-950);
+  --sidebar-border: var(--neutral-200);
+  --sidebar-footer-menu-border: var(--neutral-500);
+  --sidebar-ring: var(--brand-primary);
+  --sidebar-muted: var(--neutral-700);
+  --sidebar-logo: var(--neutral-950);
+  --sidebar-logo-foreground: var(--neutral-50);
 
   /* Feedback */
   --loader-overlay: rgb(18, 18, 18, 60%);
@@ -45,6 +72,10 @@
 }
 
 @theme inline {
+  /* Responsive layout */
+  --breakpoint-dashboard: 90rem;
+  --breakpoint-table-compact: 80.875rem;
+
   /* Colors */
   --color-background: var(--background);
   --color-card: var(--card);
@@ -58,6 +89,14 @@
   --color-disabled: var(--disabled);
   --color-disabled-foreground: var(--disabled-foreground);
   --color-input-disabled-background: var(--input-disabled-background);
+  --color-employee-avatar: var(--employee-avatar);
+  --color-employee-avatar-foreground: var(--employee-avatar-foreground);
+  --color-employee-chevron: var(--employee-chevron);
+  --color-table-search-icon: var(--table-search-icon);
+  --color-table-search-placeholder: var(--table-search-placeholder);
+  --color-pagination-border: var(--pagination-border);
+  --color-pagination-icon: var(--pagination-icon);
+  --color-pagination-text: var(--pagination-text);
   --color-primary: var(--primary);
   --color-primary-active: var(--primary-active);
   --color-on-primary: var(--on-primary);
@@ -87,7 +126,10 @@
   --text-table: 0.875rem;
 
   /* Control dimensions */
-  --spacing-control-height: 3rem;
+  --spacing-control-height: var(--control-size);
+  --spacing-compact-control: var(--compact-control-size);
+  --spacing-chevron-width: var(--chevron-width);
+  --spacing-chevron-height: var(--chevron-height);
   --spacing-button-width: 10rem;
   --spacing-ghost-button-width: 13.75rem;
   --spacing-password-recovery-button-width: 13.75rem;
@@ -103,7 +145,7 @@
   --spacing-sidebar-item-height: 3.5rem;
   --spacing-sidebar-item-inline: 0.875rem;
   --spacing-sidebar-item-gap: 0.75rem;
-  --spacing-sidebar-icon: 1.5rem;
+  --spacing-sidebar-icon: var(--medium-icon-size);
   --spacing-sidebar-footer: 3.5rem;
   --spacing-sidebar-footer-bottom: 3.5rem;
   --spacing-sidebar-footer-total: 7rem;
@@ -116,34 +158,47 @@
   --spacing-sidebar-footer-menu-divider: 5rem;
   --spacing-sidebar-profile: 0.75rem;
   --spacing-sidebar-logo: 0.75rem;
-  --spacing-sidebar-logo-mark: 1.5rem;
+  --spacing-sidebar-logo-mark: var(--medium-icon-size);
   --spacing-sidebar-toggle: 0.875rem;
   --spacing-sidebar-toggle-offset: 0.4375rem;
-  --spacing-sidebar-toggle-icon-width: 0.463125rem;
-  --spacing-sidebar-toggle-icon-height: 0.75rem;
   --spacing-sidebar-collapsed-logo: 1rem;
   --spacing-sidebar-collapsed-item: 1.25rem;
   --spacing-avatar: 2.5rem;
   --spacing-breadcrumb-header: 3.5rem;
   --spacing-table-offset: 0.625rem;
+  --spacing-table-page-inline: var(--page-inline-space);
   --spacing-table-search: 2.8125rem;
   --spacing-table-search-width: 20rem;
+  --spacing-table-search-min-width: 17.25rem;
   --spacing-table-search-gap: 0.625rem;
   --spacing-table-search-margin: 1.25rem;
+  --spacing-table-search-max-offset: 2.5rem;
   --spacing-table-search-inline: 0.75rem;
   --spacing-table-search-text: 2.875rem;
   --spacing-table-search-icon: 0.75rem;
-  --spacing-table-search-icon-size: 1.5rem;
+  --spacing-table-search-icon-size: var(--medium-icon-size);
   --spacing-table-header: 3.5rem;
   --spacing-table-cell: 1rem;
   --spacing-table-empty: 13.6875rem;
-  --spacing-table-width: 74.375rem;
+  --spacing-table-container-width: 77.375rem;
+  --spacing-table-column-avatar: 5rem;
+  --spacing-table-column-first-name: 11.0625rem;
+  --spacing-table-column-last-name: 10.875rem;
+  --spacing-table-column-email: 20rem;
+  --spacing-table-column-department: 10.1875rem;
+  --spacing-table-column-position: 12.6875rem;
+  --spacing-table-column-actions: 4.5rem;
+  --spacing-pagination-width: 22.875rem;
+  --spacing-pagination-item-gap: 0.5rem;
+  --spacing-pagination-page-size: 4.375rem;
+  --spacing-pagination-page-size-inline: 1rem;
+  --spacing-pagination-block-offset: 0.25rem;
 
   /* Layering */
   --z-index-api-loader: 50;
 
   /* Error page layout */
-  --spacing-error-page-inline: 1.5rem;
+  --spacing-error-page-inline: var(--page-inline-space);
   --spacing-error-content-width: 35rem;
   --spacing-error-content-height: 36.9375rem;
   --spacing-error-content-gap: 2rem;
@@ -152,7 +207,7 @@
   --spacing-error-icon-height: 7.5rem;
 
   /* Device error page layout */
-  --spacing-device-error-page-inline: 1.5rem;
+  --spacing-device-error-page-inline: var(--page-inline-space);
   --spacing-device-error-content-width: 20rem;
   --spacing-device-error-title-top: 0.5rem;
   --spacing-device-error-message-top: 1.25rem;
@@ -163,7 +218,7 @@
   --spacing-auth-tabs-width: 18.75rem;
   --spacing-auth-tabs-height: 3.5rem;
   --spacing-auth-content-width: 34.625rem;
-  --spacing-auth-page-inline: 1.5rem;
+  --spacing-auth-page-inline: var(--page-inline-space);
   --spacing-auth-page-top-tablet: 2.5rem;
   --spacing-auth-page-bottom: 4rem;
   --spacing-auth-content-offset: 10vh;
@@ -176,7 +231,7 @@
   /* Form-field layout */
   --spacing-field-inline: 0.75rem;
   --spacing-field-label-gap: 0.25rem;
-  --spacing-field-icon: 3rem;
+  --spacing-field-icon: var(--control-size);
   --spacing-field-message-top: 0.25rem;
 
   /* Shape and elevation */
@@ -193,28 +248,33 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Surfaces and content */
-    --background: #2e2e2e;
-    --card: #2e2e2e;
-    --card-foreground: #f5f5f7;
-    --foreground: #f5f5f7;
-    --muted-foreground: #c4c4c6;
+    --background: var(--neutral-950);
+    --card: var(--neutral-950);
+    --card-foreground: var(--neutral-50);
+    --foreground: var(--neutral-50);
+    --muted-foreground: var(--neutral-300);
 
     /* Form controls */
-    --placeholder: #626262;
-    --password-icon: #aeaeae;
-    --border: #aeaeae;
-    --table-border: #626262;
+    --placeholder: var(--neutral-700);
+    --password-icon: var(--neutral-500);
+    --table-border: var(--neutral-700);
+    --employee-avatar: var(--neutral-700);
+    --employee-avatar-foreground: var(--neutral-950);
+    --employee-chevron: var(--neutral-500);
+    --table-search-icon: var(--neutral-300);
+    --table-search-placeholder: var(--neutral-700);
+    --pagination-border: var(--neutral-700);
+    --pagination-icon: var(--neutral-500);
+    --pagination-text: var(--neutral-50);
 
-    --sidebar: #2e2e2e;
-    --sidebar-foreground: #f5f5f7;
-    --sidebar-accent: #454545;
-    --sidebar-accent-foreground: #f5f5f7;
-    --sidebar-footer-menu-border: #626262;
-    --sidebar-muted: #c4c4c6;
-    --sidebar-logo: #f5f5f7;
-    --sidebar-logo-foreground: #2e2e2e;
+    --sidebar: var(--neutral-950);
+    --sidebar-foreground: var(--neutral-50);
+    --sidebar-accent: var(--dark-surface-accent);
+    --sidebar-accent-foreground: var(--neutral-50);
+    --sidebar-footer-menu-border: var(--neutral-700);
+    --sidebar-muted: var(--neutral-300);
+    --sidebar-logo: var(--neutral-50);
+    --sidebar-logo-foreground: var(--neutral-950);
 
-    --loader-overlay: rgb(18, 18, 18, 60%);
-    --loader-track: rgb(245, 245, 247, 30%);
   }
 }

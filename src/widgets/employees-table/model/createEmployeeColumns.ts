@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
-import type { Employee } from "@/entities/employee";
+import type { Employee, EmployeeSortField } from "@/entities/employee";
 
 export interface EmployeeColumn {
   key: string;
   label?: string;
   render: (employee: Employee) => ReactNode;
-  width: number;
+  sortField?: EmployeeSortField;
+  widthClassName: string;
 }
 
 export interface EmployeeColumnRenderers {
@@ -19,32 +20,49 @@ export function createEmployeeColumns({
   renderAvatar,
 }: EmployeeColumnRenderers): readonly EmployeeColumn[] {
   return [
-    { key: "avatar", render: (employee) => renderAvatar?.(employee), width: 80 },
+    {
+      key: "avatar",
+      render: (employee) => renderAvatar?.(employee),
+      widthClassName: "w-table-column-avatar",
+    },
     {
       key: "firstName",
       label: "First Name",
+      sortField: "first_name",
       render: (employee) => employee.firstName,
-      width: 177,
+      widthClassName: "w-table-column-first-name",
     },
     {
       key: "lastName",
       label: "Last Name",
+      sortField: "last_name",
       render: (employee) => employee.lastName,
-      width: 174,
+      widthClassName: "w-table-column-last-name",
     },
-    { key: "email", label: "Email", render: (employee) => employee.email, width: 320 },
+    {
+      key: "email",
+      label: "Email",
+      render: (employee) => employee.email,
+      widthClassName: "w-table-column-email",
+    },
     {
       key: "department",
       label: "Department",
+      sortField: "department",
       render: (employee) => employee.department,
-      width: 163,
+      widthClassName: "w-table-column-department",
     },
     {
       key: "position",
       label: "Position",
+      sortField: "position",
       render: (employee) => employee.position,
-      width: 203,
+      widthClassName: "w-table-column-position",
     },
-    { key: "actions", render: (employee) => renderActions?.(employee), width: 72 },
+    {
+      key: "actions",
+      render: (employee) => renderActions?.(employee),
+      widthClassName: "w-table-column-actions",
+    },
   ];
 }

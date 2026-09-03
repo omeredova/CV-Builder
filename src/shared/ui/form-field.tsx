@@ -3,6 +3,7 @@ import { forwardRef, type InputHTMLAttributes } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/shared/lib/class-names";
+import { primaryFocusRingClassName } from "@/shared/ui/styles";
 import { PasswordVisibilityIcon } from "@/shared/ui/icons/PasswordVisibilityIcon";
 
 export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -63,7 +64,8 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             <button
               aria-label={passwordVisible ? "Hide password" : "Show password"}
               className={cn(
-                "absolute right-field-inline top-1/2 flex -translate-y-1/2 text-password-icon outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                "absolute right-field-inline top-1/2 flex -translate-y-1/2 text-password-icon",
+                primaryFocusRingClassName,
                 error && "text-primary",
               )}
               onClick={onPasswordVisibilityToggle}

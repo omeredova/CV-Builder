@@ -42,15 +42,18 @@ const navigationItems = [
   { href: "/cvs", label: "CVs", icon: FileUser },
 ] as const;
 
+const responsiveCollapsedFooterMenuClassName =
+  "max-dashboard:!gap-0 max-dashboard:!rounded-l-none max-dashboard:!rounded-r-sidebar-item max-dashboard:!px-0 max-dashboard:justify-center max-dashboard:[&>span]:sr-only max-dashboard:[&>svg]:!size-sidebar-icon";
+
 export function AppSidebar() {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <Sidebar className="group/sidebar data-[collapsed=true]:w-sidebar-collapsed" data-collapsed={isCollapsed}>
+    <Sidebar className="group/sidebar data-[collapsed=true]:w-sidebar-collapsed max-dashboard:w-sidebar-collapsed" data-collapsed={isCollapsed}>
       <SidebarHeader
         className={cn(
-          "transition-[padding] duration-sidebar",
+          "transition-[padding] duration-sidebar max-dashboard:px-sidebar-collapsed-logo",
           isCollapsed && "px-sidebar-collapsed-logo",
         )}
       >
@@ -58,7 +61,7 @@ export function AppSidebar() {
           <CvBuilderLogo className="size-sidebar-logo-mark shrink-0" />
           <span
             className={cn(
-              "leading-page-title font-medium transition-opacity duration-sidebar",
+              "leading-page-title font-medium transition-opacity duration-sidebar max-dashboard:opacity-0",
               isCollapsed && "opacity-0",
             )}
           >
@@ -71,11 +74,11 @@ export function AppSidebar() {
         <div className="flex h-sidebar-toggle shrink-0 items-center justify-end">
           <button
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="-mr-sidebar-toggle-offset flex size-sidebar-toggle items-center justify-center rounded-full bg-sidebar text-muted-foreground outline-none hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+            className="-mr-sidebar-toggle-offset flex size-sidebar-toggle items-center justify-center rounded-full bg-sidebar text-muted-foreground outline-none hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring max-dashboard:invisible"
             onClick={() => setIsCollapsed((currentValue) => !currentValue)}
             type="button"
           >
-            <SidebarChevronIcon className="h-sidebar-toggle-icon-height w-sidebar-toggle-icon-width" />
+            <SidebarChevronIcon className="h-chevron-height w-chevron-width" />
           </button>
         </div>
 
@@ -85,7 +88,7 @@ export function AppSidebar() {
               <SidebarMenuButton
                 asChild
                 className={cn(
-                  "overflow-hidden whitespace-nowrap transition-[padding] duration-sidebar",
+                  "overflow-hidden whitespace-nowrap transition-[padding] duration-sidebar max-dashboard:px-sidebar-collapsed-item",
                   isCollapsed && "px-sidebar-collapsed-item",
                 )}
                 isActive={pathname === href || (href === "/users" && pathname === "/")}
@@ -94,7 +97,7 @@ export function AppSidebar() {
                   <Icon aria-hidden="true" />
                   <span
                     className={cn(
-                      "transition-opacity duration-sidebar",
+                      "transition-opacity duration-sidebar max-dashboard:opacity-0",
                       isCollapsed && "opacity-0",
                     )}
                   >
@@ -119,7 +122,7 @@ export function AppSidebar() {
               </Avatar>
               <span
                 className={cn(
-                  "truncate font-normal transition-opacity duration-sidebar",
+                  "truncate font-normal transition-opacity duration-sidebar max-dashboard:opacity-0",
                   isCollapsed && "opacity-0",
                 )}
               >
@@ -132,19 +135,26 @@ export function AppSidebar() {
             align="start"
             alignOffset={-8}
             className={cn(
-              "relative h-sidebar-footer-menu-height !gap-0 overflow-hidden rounded-sidebar-footer-menu border border-sidebar-footer-menu-border bg-sidebar-accent py-sidebar-footer-menu-block shadow-none",
+              "relative h-sidebar-footer-menu-height !gap-0 overflow-hidden rounded-sidebar-footer-menu border border-sidebar-footer-menu-border bg-sidebar-accent py-sidebar-footer-menu-block shadow-none max-dashboard:w-sidebar-collapsed",
               isCollapsed ? "w-sidebar-collapsed" : "w-sidebar-width",
             )}
             side="top"
           >
             <DropdownMenuItem asChild>
-              <SidebarFooterMenuButton isCollapsed={isCollapsed}>
+              <SidebarFooterMenuButton
+                className={responsiveCollapsedFooterMenuClassName}
+                isCollapsed={isCollapsed}
+              >
                 <UserRound aria-hidden="true" />
                 <span>Profile</span>
               </SidebarFooterMenuButton>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <SidebarFooterMenuButton asChild isCollapsed={isCollapsed}>
+              <SidebarFooterMenuButton
+                asChild
+                className={responsiveCollapsedFooterMenuClassName}
+                isCollapsed={isCollapsed}
+              >
                 <Link href="/settings">
                   <Settings aria-hidden="true" />
                   <span>Settings</span>
@@ -153,7 +163,10 @@ export function AppSidebar() {
             </DropdownMenuItem>
             <DropdownMenuSeparator className="absolute inset-x-0 top-sidebar-footer-menu-divider" />
             <DropdownMenuItem asChild>
-              <SignOutButton isCollapsed={isCollapsed} />
+              <SignOutButton
+                className={responsiveCollapsedFooterMenuClassName}
+                isCollapsed={isCollapsed}
+              />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

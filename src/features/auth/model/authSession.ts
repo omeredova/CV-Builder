@@ -37,10 +37,19 @@ export function getAccessToken(): string | null {
   return sessionStorage.getItem(accessTokenKey);
 }
 
+export function getRefreshToken(): string | null {
+  return sessionStorage.getItem(refreshTokenKey);
+}
+
 export function clearAuthSession(): void {
   sessionStorage.removeItem(accessTokenKey);
   sessionStorage.removeItem(refreshTokenKey);
   sessionStorage.removeItem(verificationStartedAtKey);
+}
+
+export function logout(): void {
+  clearAuthSession();
+  window.location.replace("/login");
 }
 
 export function isVerificationSessionExpired(): boolean {
