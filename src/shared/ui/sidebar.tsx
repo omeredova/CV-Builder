@@ -98,10 +98,5 @@ export function SidebarMenuButton({
 }
 
 export function SidebarInset({ className, ...props }: HTMLAttributes<HTMLElement>) {
-  return (
-    <main
-      className={cn("min-w-0 flex-1 px-page-inline py-page-block", className)}
-      {...props}
-    />
-  );
+  return <main className={cn("min-w-0 flex-1", className)} {...props} />;
 }

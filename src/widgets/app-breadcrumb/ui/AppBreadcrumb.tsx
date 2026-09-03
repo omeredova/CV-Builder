@@ -11,7 +11,7 @@ interface AppBreadcrumbProps {
 
 export function AppBreadcrumb({ pageName }: AppBreadcrumbProps) {
   return (
-    <Breadcrumb>
+    <Breadcrumb className="flex h-breadcrumb-header items-center ml-5">
       <BreadcrumbList className="text-page-title leading-page-title">
         <BreadcrumbItem>
           <BreadcrumbPage className="text-muted-foreground">{pageName}</BreadcrumbPage>

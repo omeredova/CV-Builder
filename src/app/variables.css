@@ -8,6 +8,7 @@
 
   /* Form controls */
   --border: #aeaeae;
+  --table-border: #aeaeae;
   --placeholder: #c4c4c6;
   --password-icon: #626262;
   --disabled: #aeaeae;
@@ -53,6 +54,7 @@
   --color-placeholder: var(--placeholder);
   --color-password-icon: var(--password-icon);
   --color-border: var(--border);
+  --color-table-border: var(--table-border);
   --color-disabled: var(--disabled);
   --color-disabled-foreground: var(--disabled-foreground);
   --color-input-disabled-background: var(--input-disabled-background);
@@ -82,6 +84,7 @@
   --leading-page-title: 1.5rem;
   --text-sidebar-item: 1rem;
   --tracking-sidebar: 0.009375rem;
+  --text-table: 0.875rem;
 
   /* Control dimensions */
   --spacing-control-height: 3rem;
@@ -121,8 +124,20 @@
   --spacing-sidebar-collapsed-logo: 1rem;
   --spacing-sidebar-collapsed-item: 1.25rem;
   --spacing-avatar: 2.5rem;
-  --spacing-page-inline: 2rem;
-  --spacing-page-block: 1rem;
+  --spacing-breadcrumb-header: 3.5rem;
+  --spacing-table-offset: 0.625rem;
+  --spacing-table-search: 2.8125rem;
+  --spacing-table-search-width: 20rem;
+  --spacing-table-search-gap: 0.625rem;
+  --spacing-table-search-margin: 1.25rem;
+  --spacing-table-search-inline: 0.75rem;
+  --spacing-table-search-text: 2.875rem;
+  --spacing-table-search-icon: 0.75rem;
+  --spacing-table-search-icon-size: 1.5rem;
+  --spacing-table-header: 3.5rem;
+  --spacing-table-cell: 1rem;
+  --spacing-table-empty: 13.6875rem;
+  --spacing-table-width: 74.375rem;
 
   /* Layering */
   --z-index-api-loader: 50;
@@ -188,6 +203,7 @@
     --placeholder: #626262;
     --password-icon: #aeaeae;
     --border: #aeaeae;
+    --table-border: #626262;
 
     --sidebar: #2e2e2e;
     --sidebar-foreground: #f5f5f7;
