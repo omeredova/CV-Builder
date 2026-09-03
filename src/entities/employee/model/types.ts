@@ -1,8 +1,29 @@
 export interface Employee {
-  department: string;
+  avatar: string | null;
+  department: string | null;
   email: string;
-  firstName: string;
+  firstName: string | null;
   id: string;
-  lastName: string;
-  position: string;
+  lastName: string | null;
+  position: string | null;
+}
+
+export type EmployeeSortField = "first_name" | "last_name" | "department" | "position";
+
+export type SortOrder = "asc" | "desc";
+
+export interface EmployeesQueryParams {
+  limit: number;
+  page: number;
+  search?: string;
+  sortBy?: EmployeeSortField;
+  sortOrder?: SortOrder;
+}
+
+export interface PaginatedEmployees {
+  employees: readonly Employee[];
+  limit: number;
+  page: number;
+  total: number;
+  totalPages: number;
 }

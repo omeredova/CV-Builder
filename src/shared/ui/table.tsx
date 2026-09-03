@@ -7,11 +7,16 @@ import type {
 
 import { cn } from "@/shared/lib/class-names";
 
-export type TableProps = TableHTMLAttributes<HTMLTableElement>;
+export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
+  containerClassName?: string;
+}
 
-export function Table({ className, ...props }: TableProps) {
+export function Table({ className, containerClassName, ...props }: TableProps) {
   return (
-    <div className="relative w-full overflow-x-auto" data-slot="table-container">
+    <div
+      className={cn("relative w-full overflow-x-auto", containerClassName)}
+      data-slot="table-container"
+    >
       <table className={cn("w-full caption-bottom text-sm", className)} data-slot="table" {...props} />
     </div>
   );
@@ -34,7 +39,7 @@ export type TableBodyProps = HTMLAttributes<HTMLTableSectionElement>;
 export function TableBody({ className, ...props }: TableBodyProps) {
   return (
     <tbody
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn(className)}
       data-slot="table-body"
       {...props}
     />
@@ -59,7 +64,7 @@ export function TableHead({ className, ...props }: TableHeadProps) {
   return (
     <th
       className={cn(
-        "h-table-header px-table-cell text-left align-middle text-table font-medium text-foreground whitespace-nowrap",
+        "h-table-header overflow-hidden px-table-cell text-left align-middle text-table font-medium text-foreground text-ellipsis whitespace-nowrap",
         className,
       )}
       data-slot="table-head"
@@ -73,7 +78,10 @@ export type TableCellProps = TdHTMLAttributes<HTMLTableCellElement>;
 export function TableCell({ className, ...props }: TableCellProps) {
   return (
     <td
-      className={cn("p-table-cell align-middle whitespace-nowrap", className)}
+      className={cn(
+        "overflow-hidden p-table-cell align-middle text-ellipsis whitespace-nowrap",
+        className,
+      )}
       data-slot="table-cell"
       {...props}
     />

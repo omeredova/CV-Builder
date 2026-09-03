@@ -2,6 +2,7 @@ import { Slot } from "@radix-ui/react-slot";
 import type { ComponentPropsWithoutRef, HTMLAttributes } from "react";
 
 import { cn } from "@/shared/lib/class-names";
+import { primaryFocusRingClassName } from "@/shared/ui/styles";
 
 export type TabsProps = HTMLAttributes<HTMLDivElement>;
 
@@ -38,7 +39,8 @@ export function TabsTrigger({
     <Component
       aria-selected={active}
       className={cn(
-        "flex h-full items-center justify-center border-b-2 border-transparent text-sm font-bold uppercase outline-none transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-primary active:border-primary active:text-primary",
+        "flex h-full items-center justify-center border-b-2 border-transparent text-sm font-bold uppercase transition-colors hover:text-primary active:border-primary active:text-primary",
+        primaryFocusRingClassName,
         active && "border-primary text-primary",
         className,
       )}

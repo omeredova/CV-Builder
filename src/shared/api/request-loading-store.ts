@@ -2,9 +2,16 @@ type RequestLoadingListener = () => void;
 
 let activeRequestCount = 0;
 const listeners = new Set<RequestLoadingListener>();
+let notificationScheduled = false;
 
 function notifyListeners(): void {
-  listeners.forEach((listener) => listener());
+  if (notificationScheduled) return;
+
+  notificationScheduled = true;
+  queueMicrotask(() => {
+    notificationScheduled = false;
+    listeners.forEach((listener) => listener());
+  });
 }
 
 export function beginApiRequest(): () => void {
