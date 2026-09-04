@@ -33,22 +33,22 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     const describedBy = error ? `${id}-error` : undefined;
 
     return (
-      <div className="w-field-width max-w-full">
+      <div className="relative w-field-width max-w-full">
         <div className="relative">
           <Input
             aria-describedby={describedBy}
             aria-invalid={Boolean(error)}
             className={cn(
-              "peer h-control-height w-full border border-border bg-transparent px-field-inline text-base font-normal text-foreground outline-none placeholder:text-placeholder hover:border-muted-foreground focus:border-muted-foreground focus:placeholder:text-transparent disabled:bg-input-disabled-background disabled:text-disabled disabled:opacity-100 disabled:placeholder:text-disabled",
+              "peer",
               passwordIcon && "pr-field-icon",
-              passwordIcon && "focus:border-foreground",
-              error && "border-primary hover:border-primary focus:border-primary",
+              passwordIcon && !error && "focus:border-foreground",
               className,
             )}
             disabled={disabled}
             id={id}
             ref={ref}
             type={type}
+            variant={error ? "invalid" : "default"}
             {...props}
           />
           <Label
@@ -76,7 +76,11 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
           ) : null}
         </div>
         {error ? (
-          <p className="mt-field-message-top text-xs text-primary" id={describedBy} role="alert">
+          <p
+            className="absolute left-field-inline top-full mt-field-message-top text-xs text-primary"
+            id={describedBy}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}

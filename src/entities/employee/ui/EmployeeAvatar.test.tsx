@@ -25,6 +25,21 @@ describe("EmployeeAvatar", () => {
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
+  it("uses the 40px font token for the profile avatar initial", () => {
+    render(
+      <EmployeeAvatar
+        avatar={null}
+        email="ada@example.com"
+        firstName="Ada"
+        size="profile"
+      />,
+    );
+
+    expect(screen.getByRole("img", { name: "Ada avatar" })).toHaveClass(
+      "[font-size:var(--text-profile-avatar)]",
+    );
+  });
+
   it("uses the email initial when the first name is unavailable", () => {
     render(<EmployeeAvatar avatar={null} email="ada@example.com" firstName={null} />);
 

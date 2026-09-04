@@ -7,9 +7,10 @@ export interface EmployeeAvatarProps {
   avatar: string | null;
   firstName: string | null;
   email: string;
+  size?: "profile" | "table";
 }
 
-export function EmployeeAvatar({ avatar, firstName, email }: EmployeeAvatarProps) {
+export function EmployeeAvatar({ avatar, firstName, email, size = "table" }: EmployeeAvatarProps) {
   const normalizedFirstName = firstName?.trim();
   const displayName = normalizedFirstName || email;
   const initial = formatName(displayName);
@@ -17,16 +18,20 @@ export function EmployeeAvatar({ avatar, firstName, email }: EmployeeAvatarProps
   return (
     <Avatar
       aria-label={`${displayName} avatar`}
-      className="size-10 bg-employee-avatar text-xl text-employee-avatar-foreground"
+      className={
+        size === "profile"
+          ? "size-profile-avatar bg-employee-avatar [font-size:var(--text-profile-avatar)] text-employee-avatar-foreground"
+          : "size-10 bg-employee-avatar text-xl text-employee-avatar-foreground"
+      }
       role="img"
     >
       {avatar ? (
         <Image
           alt=""
           className="size-full object-cover"
-          height={40}
+          height={size === "profile" ? 120 : 40}
           src={avatar}
-          width={40}
+          width={size === "profile" ? 120 : 40}
         />
       ) : (
         <AvatarFallback>{initial}</AvatarFallback>
