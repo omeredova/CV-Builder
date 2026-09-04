@@ -24,9 +24,11 @@
   --card-foreground: var(--neutral-950);
   --foreground: var(--neutral-950);
   --muted-foreground: var(--neutral-700);
+  --profile-name: var(--neutral-950);
 
   /* Form controls */
   --border: var(--neutral-500);
+  --input-background: transparent;
   --table-border: var(--neutral-500);
   --placeholder: var(--neutral-300);
   --password-icon: var(--neutral-700);
@@ -82,9 +84,11 @@
   --color-card-foreground: var(--card-foreground);
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
+  --color-profile-name: var(--profile-name);
   --color-placeholder: var(--placeholder);
   --color-password-icon: var(--password-icon);
   --color-border: var(--border);
+  --color-input-background: var(--input-background);
   --color-table-border: var(--table-border);
   --color-disabled: var(--disabled);
   --color-disabled-foreground: var(--disabled-foreground);
@@ -121,6 +125,8 @@
   --leading-error-title: 1.25;
   --text-page-title: 1rem;
   --leading-page-title: 1.5rem;
+  --text-navigation-tab: 0.875rem;
+  --text-input: 1rem;
   --text-sidebar-item: 1rem;
   --tracking-sidebar: 0.009375rem;
   --text-table: 0.875rem;
@@ -194,6 +200,23 @@
   --spacing-pagination-page-size-inline: 1rem;
   --spacing-pagination-block-offset: 0.25rem;
 
+  /* User profile */
+  --spacing-profile-tabs-height: 3.125rem;
+  --spacing-navigation-tab-width: 9.375rem;
+  --spacing-profile-content: 56.25rem;
+  --spacing-profile-fields-width: 53.25rem;
+  --spacing-profile-field-width: 25.625rem;
+  --spacing-profile-inline: 1.5rem;
+  --spacing-profile-top: 0.75rem;
+  --spacing-profile-avatar: 7.5rem;
+  --spacing-profile-name: 2rem;
+  --spacing-profile-fields: 3.25rem;
+  --spacing-profile-column: 2rem;
+  --spacing-profile-row: 1.25rem;
+  --spacing-profile-row-compact: 1rem;
+  --text-profile-name: 1.5rem;
+  --text-profile-avatar: 2.5rem;
+
   /* Layering */
   --z-index-api-loader: 50;
 
@@ -215,7 +238,6 @@
   --spacing-device-error-icon-height: 6rem;
 
   /* Authentication layout */
-  --spacing-auth-tabs-width: 18.75rem;
   --spacing-auth-tabs-height: 3.5rem;
   --spacing-auth-content-width: 34.625rem;
   --spacing-auth-page-inline: var(--page-inline-space);
@@ -253,9 +275,12 @@
     --card-foreground: var(--neutral-50);
     --foreground: var(--neutral-50);
     --muted-foreground: var(--neutral-300);
+    --profile-name: var(--neutral-50);
 
     /* Form controls */
-    --placeholder: var(--neutral-700);
+    --input-background: var(--neutral-700);
+    --input-disabled-background: var(--neutral-700);
+    --placeholder: var(--neutral-500);
     --password-icon: var(--neutral-500);
     --table-border: var(--neutral-700);
     --employee-avatar: var(--neutral-700);

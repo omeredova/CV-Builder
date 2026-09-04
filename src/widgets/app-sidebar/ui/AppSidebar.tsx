@@ -45,8 +45,12 @@ const navigationItems = [
 const responsiveCollapsedFooterMenuClassName =
   "max-dashboard:!gap-0 max-dashboard:!rounded-l-none max-dashboard:!rounded-r-sidebar-item max-dashboard:!px-0 max-dashboard:justify-center max-dashboard:[&>span]:sr-only max-dashboard:[&>svg]:!size-sidebar-icon";
 
+export function isNavigationItemActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`) || (href === "/users" && pathname === "/");
+}
+
 export function AppSidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
@@ -91,7 +95,7 @@ export function AppSidebar() {
                   "overflow-hidden whitespace-nowrap transition-[padding] duration-sidebar max-dashboard:px-sidebar-collapsed-item",
                   isCollapsed && "px-sidebar-collapsed-item",
                 )}
-                isActive={pathname === href || (href === "/users" && pathname === "/")}
+                isActive={isNavigationItemActive(pathname, href)}
               >
                 <Link href={href}>
                   <Icon aria-hidden="true" />

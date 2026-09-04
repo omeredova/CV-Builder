@@ -5,6 +5,11 @@ export {
   type UsersQueryVariables,
 } from "./api/employeesQuery";
 export { mapUsersQueryResult } from "./api/mapUsersQueryResult";
+export {
+  userCreatedAtQuery,
+  type UserCreatedAtQueryData,
+  type UserCreatedAtQueryVariables,
+} from "./api/userCreatedAtQuery";
 export type {
   Employee,
   EmployeeSortField,

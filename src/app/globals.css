@@ -16,7 +16,16 @@ body {
 
 button,
 input {
-  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="input"]::placeholder,
+[data-slot="textarea"]::placeholder {
+  font-size: var(--text-input);
 }
 
 input:-webkit-autofill,

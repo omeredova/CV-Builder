@@ -89,7 +89,7 @@ export function SidebarMenuButton({
         "flex h-sidebar-item-height w-full items-center gap-sidebar-item-gap px-sidebar-item-inline font-normal text-sidebar-muted outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring [&>svg]:size-sidebar-icon [&>svg]:shrink-0",
         isActive
           ? "rounded-l-none rounded-r-sidebar-item bg-sidebar-accent text-sidebar-foreground"
-          : "rounded-sidebar-item",
+          : "rounded-sidebar-item hover:rounded-l-none hover:rounded-r-sidebar-item",
         className,
       )}
       {...props}
