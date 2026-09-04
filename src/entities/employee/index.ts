@@ -18,3 +18,5 @@ export type {
   SortOrder,
 } from "./model/types";
 export { EmployeeAvatar, type EmployeeAvatarProps } from "./ui/EmployeeAvatar";
+export { currentProfileQuery, type CurrentProfileQueryData } from "./api/currentProfileQuery";
+export { updateEmployeeAvatarCache } from "./api/updateEmployeeAvatarCache";

@@ -5,12 +5,14 @@ import { ChevronDown, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
-  EmployeeAvatar,
+  currentProfileQuery,
+  type CurrentProfileQueryData,
   type Employee,
   userCreatedAtQuery,
   type UserCreatedAtQueryData,
   type UserCreatedAtQueryVariables,
 } from "@/entities/employee";
+import { AvatarUploader } from "@/features/avatar-upload";
 import { formatUnixDate } from "@/shared/lib/formatters";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/empty";
 import { Input } from "@/shared/ui/input";
@@ -21,6 +23,7 @@ export interface UserProfileProps {
   employee: Employee;
   initialTab?: UserProfileTab;
   onClose?: () => void;
+  onAvatarChange?: (avatar: string | null) => void;
 }
 
 export type UserProfileTab = "languages" | "profile" | "skills";
@@ -57,7 +60,9 @@ function ProfileField({ label, select = false, value }: ProfileFieldProps) {
   );
 }
 
-export function UserProfile({ employee, initialTab = "profile", onClose }: UserProfileProps) {
+export function UserProfile({ employee, initialTab = "profile", onClose, onAvatarChange }: UserProfileProps) {
+  const { data: currentProfile, loading: isCheckingOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
+  const canUpload = currentProfile?.me.id === employee.id;
   const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
   const { data, error, loading } = useQuery<
     UserCreatedAtQueryData,
@@ -110,11 +115,12 @@ export function UserProfile({ employee, initialTab = "profile", onClose }: UserP
       {activeTab === "profile" ? (
         <main className="mx-auto w-full max-w-profile-content px-profile-inline pt-profile-top">
           <section className="flex flex-col items-center text-center" aria-labelledby="user-profile-name">
-            <EmployeeAvatar
-              avatar={employee.avatar}
-              email={employee.email}
-              firstName={employee.firstName}
-              size="profile"
+            <AvatarUploader
+              canUpload={canUpload}
+              employee={employee}
+              isCheckingOwner={isCheckingOwner}
+              key={employee.id}
+              onAvatarChange={onAvatarChange}
             />
             <h1
               className="mt-profile-name [font-size:var(--text-profile-name)] leading-tight text-profile-name"

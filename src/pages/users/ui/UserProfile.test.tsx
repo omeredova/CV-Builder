@@ -1,9 +1,9 @@
 import { MockedProvider } from "@apollo/client/testing/react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { userCreatedAtQuery, type Employee } from "@/entities/employee";
+import { currentProfileQuery, userCreatedAtQuery, type Employee } from "@/entities/employee";
 
 import { UserProfile } from "./UserProfile";
 
@@ -74,4 +74,26 @@ describe("UserProfile", () => {
     );
     expect(screen.getByRole("heading", { name: "No skills yet" })).toBeInTheDocument();
   });
+  it.each([
+    ["user-1", true, 60, 0],
+    ["other-user", false, 60, 0],
+    ["user-1", true, 0, 60],
+    ["other-user", false, 0, 60],
+  ])("checks viewer ID %s (editable: %s, ownership delay: %s, date delay: %s)", async (id, visible, ownershipDelay, dateDelay) => {
+    render(
+      <MockedProvider mocks={[
+        { request: { query: currentProfileQuery }, delay: ownershipDelay, result: { data: { me: { id } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: dateDelay, result: { data: { user: { created_at: "1705233600" } } } },
+      ]}>
+        <UserProfile employee={employee} />
+      </MockedProvider>,
+    );
+    await screen.findByText("A member since Sun Jan 14 2024");
+    await waitFor(() => {
+      expect(screen.getByRole("img", { name: "Rostislav avatar" }).closest("[aria-busy]")).toHaveAttribute("aria-busy", "false");
+    });
+    if (visible) expect(await screen.findByRole("button", { name: "Upload avatar image" })).toBeInTheDocument();
+    else expect(screen.queryByRole("button", { name: "Upload avatar image" })).not.toBeInTheDocument();
+  });
+
 });

@@ -20,43 +20,8 @@ import { ConnectionErrorPage } from "@/shared/ui/connection-error-page";
 import { ChevronRightIcon } from "@/shared/ui/icons/ChevronRightIcon";
 import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { EmployeesTable } from "@/widgets/employees-table";
+import { parseStoredEmployee, readStoredEmployee, storeEmployee } from "../model/profileStorage";
 import { getUserProfileTab, UserProfile } from "./UserProfile";
-
-const storedEmployeeKeyPrefix = "cv-builder:user-profile:";
-
-function parseStoredEmployee(value: string | null, userId: string): Employee | null {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const employee: unknown = JSON.parse(value);
-    if (isEmployee(employee) && employee.id === userId) return employee;
-  } catch {
-    return null;
-  }
-
-  return null;
-}
-
-function isNullableString(value: unknown): value is string | null {
-  return typeof value === "string" || value === null;
-}
-
-function isEmployee(value: unknown): value is Employee {
-  if (typeof value !== "object" || value === null) return false;
-
-  const employee = value as Record<string, unknown>;
-  return (
-    typeof employee.id === "string" &&
-    typeof employee.email === "string" &&
-    isNullableString(employee.avatar) &&
-    isNullableString(employee.department) &&
-    isNullableString(employee.firstName) &&
-    isNullableString(employee.lastName) &&
-    isNullableString(employee.position)
-  );
-}
 
 function subscribeToSessionStorage(onStoreChange: () => void): () => void {
   window.addEventListener("storage", onStoreChange);
@@ -94,7 +59,7 @@ export function UsersPage() {
     subscribeToSessionStorage,
     () =>
       routeUserId
-        ? sessionStorage.getItem(`${storedEmployeeKeyPrefix}${routeUserId}`)
+        ? readStoredEmployee(routeUserId)
         : null,
     () => null,
   );
@@ -139,6 +104,13 @@ export function UsersPage() {
       <UserProfile
         employee={activeEmployee}
         initialTab={getUserProfileTab(pathname)}
+        onAvatarChange={(avatar) => {
+          const updatedEmployee = { ...activeEmployee, avatar };
+          storeEmployee(updatedEmployee);
+          if (window.location.pathname.startsWith(`/users/${encodeURIComponent(activeEmployee.id)}/`)) {
+            setSelectedEmployee(updatedEmployee);
+          }
+        }}
         onClose={() => setSelectedEmployee(null)}
       />
     );
@@ -173,10 +145,7 @@ export function UsersPage() {
             className="mx-auto flex size-9 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary"
             onClick={() => {
               setSelectedEmployee(employee);
-              sessionStorage.setItem(
-                `${storedEmployeeKeyPrefix}${employee.id}`,
-                JSON.stringify(employee),
-              );
+              storeEmployee(employee);
               window.history.pushState(
                 null,
                 "",
