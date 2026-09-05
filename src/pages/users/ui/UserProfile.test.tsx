@@ -13,6 +13,9 @@ import { sendVerificationMutation } from "@/features/auth/email-verification/api
 import { createUpdateProfileMutation } from "@/features/profile-edit/api/updateProfileMutation";
 
 import { UserProfile } from "./UserProfile";
+import { profileSkillsQuery } from "@/entities/skill";
+
+const emptySkillsMock = { request: { query: profileSkillsQuery, variables: { userId: "user-1" } }, result: { data: { profile: { id: "user-1", skills: [] }, skillCategories: [] } } };
 
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -155,6 +158,7 @@ describe("UserProfile", () => {
   it.each(["/new-avatar.png", null])("preserves an updated avatar (%s) across profile tabs before names are saved", async (avatar) => {
     const user = userEvent.setup();
     const mocks = [
+      emptySkillsMock,
       { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
       { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
     ];
@@ -202,27 +206,65 @@ describe("UserProfile", () => {
     expect(await screen.findByText("A member since Sun Jan 14 2024")).toBeInTheDocument();
   });
 
+  it.each(["user-1", "other-user"])("shows skill actions only for the profile owner (%s)", async (viewerId) => {
+    render(<MockedProvider mocks={[
+      emptySkillsMock,
+      { request: { query: currentProfileQuery }, result: { data: { me: { id: viewerId } } } },
+    ]}><UserProfile employee={employee} initialTab="skills" /></MockedProvider>);
+    expect(screen.queryByRole("button", { name: "ADD SKILL" })).not.toBeInTheDocument();
+    await screen.findByText("No skills here");
+    if (viewerId === employee.id) {
+      expect(await screen.findByRole("button", { name: "ADD SKILL" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "REMOVE SKILLS" })).toHaveClass("text-primary");
+    } else {
+      expect(screen.queryByRole("button", { name: "ADD SKILL" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "REMOVE SKILLS" })).not.toBeInTheDocument();
+    }
+  });
+
+  it("requests skills only after activating their tab with the keyboard", async () => {
+    const user = userEvent.setup();
+    const result = vi.fn(() => emptySkillsMock.result);
+    render(<MockedProvider mocks={[
+      { ...emptySkillsMock, result },
+      { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+    ]}><UserProfile employee={employee} /></MockedProvider>);
+    await screen.findByText("A member since Sun Jan 14 2024");
+    expect(result).not.toHaveBeenCalled();
+    screen.getByRole("tab", { name: "Profile" }).focus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Skills" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "Skills" })).toHaveAttribute("aria-selected", "true");
+    expect(await screen.findByText("No skills here")).toBeInTheDocument();
+    expect(result).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("tab", { name: "Profile" }));
+    await user.click(screen.getByRole("tab", { name: "Skills" }));
+    expect(await screen.findByText("No skills here")).toBeInTheDocument();
+    expect(result).toHaveBeenCalledTimes(1);
+  });
+
   it("opens empty skills and languages pages and updates the URL", async () => {
     const user = userEvent.setup();
 
     render(
-      <MockedProvider>
+      <MockedProvider mocks={[emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} />
       </MockedProvider>,
     );
 
     await user.click(screen.getByRole("tab", { name: "Skills" }));
     expect(window.location.pathname).toBe("/users/user-1/skills");
-    expect(screen.getByRole("heading", { name: "No skills yet" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No skills here" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: "Languages" }));
     expect(window.location.pathname).toBe("/users/user-1/languages");
     expect(screen.getByRole("heading", { name: "No languages yet" })).toBeInTheDocument();
   });
 
-  it("opens the tab supplied from a refreshed URL", () => {
+  it("opens the tab supplied from a refreshed URL", async () => {
     render(
-      <MockedProvider>
+      <MockedProvider mocks={[emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} initialTab="skills" />
       </MockedProvider>,
     );
@@ -231,7 +273,7 @@ describe("UserProfile", () => {
       "aria-selected",
       "true",
     );
-    expect(screen.getByRole("heading", { name: "No skills yet" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No skills here" })).toBeInTheDocument();
   });
   it.each([
     ["user-1", true, 60, 0],
