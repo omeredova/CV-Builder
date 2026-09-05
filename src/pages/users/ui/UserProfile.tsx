@@ -15,7 +15,6 @@ import {
 import { AvatarUploader, useProfileEdit, type ProfileChanges } from "@/features/profile-edit";
 import { useSendVerification } from "@/features/auth";
 import { formatUnixDate } from "@/shared/lib/formatters";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/empty";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Select } from "@/shared/ui/select";
 import { FormField } from "@/shared/ui/form-field";
@@ -23,6 +22,8 @@ import { Button } from "@/shared/ui/button";
 import { NavigationTabs } from "@/shared/ui/navigation-tabs";
 import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { UserSkills } from "@/widgets/user-skills";
+import { UserLanguages } from "@/widgets/user-languages";
+import { LanguageActions } from "@/entities/language";
 import { SkillActions } from "@/entities/skill";
 
 export interface UserProfileProps {
@@ -47,8 +48,8 @@ export function getUserProfileTab(pathname: string): UserProfileTab {
 
 export function UserProfile({ employee, initialTab = "profile", onClose, onProfileChange }: UserProfileProps) {
   const { data: currentProfile, loading: isCheckingOwner, error: ownerError, refetch: retryOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
-  const canUpload = !ownerError && currentProfile?.me.id === employee.id;
-  const profile = useProfileEdit(employee, canUpload, onProfileChange);
+  const canEditOwnProfile = !ownerError && currentProfile?.me.id === employee.id;
+  const profile = useProfileEdit(employee, canEditOwnProfile, onProfileChange);
   const verification = useSendVerification();
   const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
   const { data, error, loading, refetch: retryDate } = useQuery<
@@ -111,7 +112,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
         <div role="tabpanel" id={`employee-panel-${activeTab}`} aria-labelledby={`employee-tab-${activeTab}`} tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline pt-profile-top">
           <section className="flex flex-col items-center text-center" aria-labelledby="user-profile-name">
             <AvatarUploader
-              canUpload={canUpload}
+              canUpload={canEditOwnProfile}
               employee={{ ...employee, ...profile.saved }}
               isCheckingOwner={isCheckingOwner}
               key={employee.id}
@@ -151,16 +152,16 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
                 label={field.label}
                 containerClassName="w-profile-field-width max-table-compact:w-full"
                 labelPlacement="above"
-                variant={canUpload ? "active" : "default"}
+                variant={canEditOwnProfile ? "active" : "default"}
                 type="text"
                 autoComplete={field.autoComplete}
                 required
                 maxLength={100}
-                disabled={!canUpload}
+                disabled={!canEditOwnProfile}
                 readOnly={profile.loading}
                 value={field.value}
                 onChange={(event) => field.setValue(event.target.value)}
-                error={canUpload ? field.error : undefined}
+                error={canEditOwnProfile ? field.error : undefined}
               />
             ))}
             {(["department", "position"] as const).map((field) => {
@@ -175,19 +176,19 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
                 value={selected?.id ?? profile.employment.saved[`${field}Id`] ?? ""}
                 displayValue={selected?.name ?? saved ?? undefined}
                 options={state.items.map((item) => ({ value: item.id, label: item.name }))}
-                disabled={!canUpload || profile.loading}
+                disabled={!canEditOwnProfile || profile.loading}
                 loading={state.loading}
-                error={canUpload ? state.error ?? profile.employment.validationErrors[field] : undefined}
+                error={canEditOwnProfile ? state.error ?? profile.employment.validationErrors[field] : undefined}
                 onOpen={() => { void profile.employment.loadOptions(field); }}
                 onValueChange={(value) => profile.employment.select(field, value)}
               />;
             })}
-            {canUpload && (
+            {canEditOwnProfile && (
               <>
                 {profile.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{profile.error}</p>}
                 {verification.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{verification.error}</p>}
                 <div className="col-start-2 mt-4 flex w-full justify-end gap-6 max-table-compact:col-start-1 max-table-compact:mt-5">
-                  <Button type="button" size="default" variant="secondary" disabled={verification.isLoading} aria-busy={verification.isLoading} onClick={() => { if (canUpload) void verification.sendVerification(employee.email); }}>VERIFY EMAIL</Button>
+                  <Button type="button" size="default" variant="secondary" disabled={verification.isLoading} aria-busy={verification.isLoading} onClick={() => { if (canEditOwnProfile) void verification.sendVerification(employee.email); }}>VERIFY EMAIL</Button>
                   <Button type="submit" size="default" variant="primary" disabled={!profile.canSubmit} aria-busy={profile.loading}>UPDATE</Button>
                 </div>
               </>
@@ -196,18 +197,11 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
         </div>
       ) : activeTab === "skills" ? (
         <div role="tabpanel" id="employee-panel-skills" aria-labelledby="employee-tab-skills" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <UserSkills key={employee.id} userId={employee.id} actions={canUpload && !isCheckingOwner ? <SkillActions /> : undefined} />
+          <UserSkills key={employee.id} userId={employee.id} actions={canEditOwnProfile && !isCheckingOwner ? <SkillActions /> : undefined} />
         </div>
       ) : (
-        <div role="tabpanel" id={`employee-panel-${activeTab}`} aria-labelledby={`employee-tab-${activeTab}`} tabIndex={0} className="grid min-h-[calc(100vh-var(--spacing-breadcrumb-header)-var(--spacing-profile-tabs-height))] place-items-center px-profile-inline">
-          <Empty>
-            <EmptyHeader>
-              <EmptyTitle>No {activeTab} yet</EmptyTitle>
-              <EmptyDescription>
-                This employee has no {activeTab} to display.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+        <div role="tabpanel" id="employee-panel-languages" aria-labelledby="employee-tab-languages" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <UserLanguages key={employee.id} userId={employee.id} actions={canEditOwnProfile && !isCheckingOwner ? <LanguageActions /> : undefined} />
         </div>
       )}
     </>

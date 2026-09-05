@@ -13,9 +13,12 @@ import { sendVerificationMutation } from "@/features/auth/email-verification/api
 import { createUpdateProfileMutation } from "@/features/profile-edit/api/updateProfileMutation";
 
 import { UserProfile } from "./UserProfile";
+import { profileLanguagesQuery } from "@/entities/language";
 import { profileSkillsQuery } from "@/entities/skill";
 
 const emptySkillsMock = { request: { query: profileSkillsQuery, variables: { userId: "user-1" } }, result: { data: { profile: { id: "user-1", skills: [] }, skillCategories: [] } } };
+
+const emptyLanguagesMock = { request: { query: profileLanguagesQuery, variables: { userId: "user-1" } }, result: { data: { profile: { id: "user-1", languages: [] } } } };
 
 const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
@@ -222,6 +225,34 @@ describe("UserProfile", () => {
     }
   });
 
+  it.each(["user-1", "other-user"])("shows language actions only for the profile owner (%s)", async (viewerId) => {
+    render(<MockedProvider mocks={[
+      emptyLanguagesMock,
+      { request: { query: currentProfileQuery }, delay: 40, result: { data: { me: { id: viewerId } } } },
+    ]}><UserProfile employee={employee} initialTab="languages" /></MockedProvider>);
+    expect(screen.getByRole("tab", { name: "Languages" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.queryByRole("button", { name: "ADD LANGUAGE" })).not.toBeInTheDocument();
+    await screen.findByText("No languages here");
+    if (viewerId === employee.id) {
+      expect(await screen.findByRole("button", { name: "ADD LANGUAGE" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "REMOVE LANGUAGES" })).toHaveClass("text-primary");
+    } else {
+      expect(screen.queryByRole("button", { name: "ADD LANGUAGE" })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "REMOVE LANGUAGES" })).not.toBeInTheDocument();
+    }
+  });
+
+  it("keeps languages read-only when the ownership check fails", async () => {
+    render(<MockedProvider mocks={[
+      emptyLanguagesMock,
+      { request: { query: currentProfileQuery }, error: new Error("Offline") },
+    ]}><UserProfile employee={employee} initialTab="languages" /></MockedProvider>);
+    await screen.findByText("No languages here");
+    await screen.findByText("Unable to check profile editing access.");
+    expect(screen.queryByRole("button", { name: "ADD LANGUAGE" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "REMOVE LANGUAGES" })).not.toBeInTheDocument();
+  });
+
   it("requests skills only after activating their tab with the keyboard", async () => {
     const user = userEvent.setup();
     const result = vi.fn(() => emptySkillsMock.result);
@@ -248,7 +279,7 @@ describe("UserProfile", () => {
     const user = userEvent.setup();
 
     render(
-      <MockedProvider mocks={[emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
+      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} />
       </MockedProvider>,
     );
@@ -259,12 +290,12 @@ describe("UserProfile", () => {
 
     await user.click(screen.getByRole("tab", { name: "Languages" }));
     expect(window.location.pathname).toBe("/users/user-1/languages");
-    expect(screen.getByRole("heading", { name: "No languages yet" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No languages here" })).toBeInTheDocument();
   });
 
   it("opens the tab supplied from a refreshed URL", async () => {
     render(
-      <MockedProvider mocks={[emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
+      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} initialTab="skills" />
       </MockedProvider>,
     );
