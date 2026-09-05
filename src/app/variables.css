@@ -17,6 +17,7 @@
   --chevron-height: 0.75rem;
   --medium-icon-size: 1.5rem;
   --page-inline-space: 1.5rem;
+  --profile-inline-space: 1.5rem;
 
   /* Surfaces and content */
   --background: var(--neutral-50);
@@ -231,7 +232,7 @@
   --spacing-profile-content: 56.25rem;
   --spacing-profile-fields-width: 53.25rem;
   --spacing-profile-field-width: 25.625rem;
-  --spacing-profile-inline: 1.5rem;
+  --spacing-profile-inline: var(--profile-inline-space);
   --spacing-profile-top: 0.75rem;
   --spacing-profile-avatar: 7.5rem;
   --spacing-profile-name: 2rem;
@@ -290,6 +291,13 @@
   --transition-duration-sidebar: 200ms;
   --shadow-control-active: var(--control-shadow);
   --shadow-primary: var(--primary-shadow);
+}
+
+/* Match the dashboard breakpoint for tablet layouts. */
+@media (width < 90rem) {
+  :root {
+    --profile-inline-space: 3rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
