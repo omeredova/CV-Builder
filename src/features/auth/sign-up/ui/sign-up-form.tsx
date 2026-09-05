@@ -65,6 +65,7 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
       <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
           <div className="flex w-full flex-col items-center gap-auth-fields-gap">
             <FormField
+              containerClassName="w-full"
               autoComplete="email"
               error={touched.email ? errors.email : undefined}
               id="email"
@@ -77,6 +78,7 @@ export function SignUpForm({ registrationError }: SignUpFormProps) {
               value={values.email}
             />
             <PasswordConfirmationFields
+              containerClassName="w-full"
               errors={errors}
               onBlur={touchField}
               onChange={updateField}

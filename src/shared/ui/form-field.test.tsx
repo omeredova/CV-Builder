@@ -20,3 +20,21 @@ describe("FormField", () => {
     expect(screen.getByRole("alert")).toHaveClass("absolute", "top-full");
   });
 });
+
+describe("FormField accessibility", () => {
+  it("keeps both caller help text and inline validation associated with the input", () => {
+    render(<>
+      <p id="help">Enter your current password.</p>
+      <FormField id="password" label="Password" aria-describedby="help" aria-invalid={false} error="Password is required" />
+    </>);
+    const field = screen.getByLabelText("Password");
+    expect(field).toHaveAccessibleDescription("Enter your current password. Password is required");
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveAttribute("id", "password-error");
+  });
+
+  it("preserves caller-supplied invalid state without an inline error", () => {
+    render(<FormField label="Name" aria-invalid="grammar" />);
+    expect(screen.getByLabelText("Name")).toHaveAttribute("aria-invalid", "grammar");
+  });
+});

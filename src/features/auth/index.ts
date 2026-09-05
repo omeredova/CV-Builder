@@ -25,3 +25,4 @@ export { SignUpForm, type RegistrationError, type SignUpFormProps } from "./sign
 export { AuthFormCard, type AuthFormCardProps } from "./ui/AuthFormCard";
 export { refreshAccessToken } from "./api/refreshAccessToken";
 export { getAccessToken, logout } from "./model/authSession";
+export { PasswordChangeForm } from "./password-change/ui/PasswordChangeForm";

@@ -48,3 +48,38 @@ describe("Select", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 });
+
+describe("Select keyboard shortcuts", () => {
+  it("opens with Space, handles Home/End while closed, and commits on Tab", async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    render(<><Select label="Department" value="1" options={options} onValueChange={onValueChange} onOpen={vi.fn()} /><button>Next</button></>);
+    const control = screen.getByRole("combobox");
+    await user.tab();
+    await user.keyboard(" {Escape}{End}");
+    expect(control).toHaveAttribute("aria-activedescendant", screen.getByRole("option", { name: "Design" }).id);
+    await user.tab();
+    expect(onValueChange).toHaveBeenCalledWith("2");
+    expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    await user.tab({ shift: true });
+    await user.keyboard("{Home}{Enter}");
+    expect(onValueChange).toHaveBeenLastCalledWith("1");
+    expect(control).toHaveFocus();
+  });
+
+  it("supports closed typeahead, repeated-letter cycling, and Escape without changing the value", async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    render(<Select label="Language" value="en" options={[{value:"en",label:"English"},{value:"pl",label:"Polish"},{value:"pt",label:"Portuguese"}]} onValueChange={onValueChange} onOpen={vi.fn()} />);
+    await user.tab();
+    await user.keyboard("p");
+    expect(screen.getByRole("combobox")).toHaveAttribute("aria-activedescendant", screen.getByRole("option", {name:"Polish"}).id);
+    await user.keyboard("p");
+    expect(screen.getByRole("combobox")).toHaveAttribute("aria-activedescendant", screen.getByRole("option", {name:"Portuguese"}).id);
+    await user.keyboard("{Escape}");
+    expect(onValueChange).not.toHaveBeenCalled();
+    await user.keyboard("pol{Enter}");
+    expect(onValueChange).toHaveBeenCalledWith("pl");
+  });
+});

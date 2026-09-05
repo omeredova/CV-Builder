@@ -61,6 +61,7 @@ export function PasswordRecoveryForm({ recoveryError }: PasswordRecoveryFormProp
     >
       <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
         <FormField
+          containerClassName="w-full"
           autoComplete="email"
           error={touched ? errors.email : undefined}
           id="recovery-email"

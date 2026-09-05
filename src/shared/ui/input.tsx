@@ -12,8 +12,8 @@ export const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-border hover:border-muted-foreground focus:border-muted-foreground",
-        active: "border-muted-foreground bg-transparent hover:border-foreground focus:border-foreground",
+        default: "border-input-border hover:border-input-border-hover focus:border-input-border-active",
+        active: "border-input-border-active bg-transparent hover:border-input-border-active focus:border-input-border-active",
         invalid: "border-primary hover:border-primary focus:border-primary",
       },
       control: {

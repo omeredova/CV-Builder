@@ -10,7 +10,7 @@ describe("Input", () => {
     expect(screen.getByRole("textbox", { name: "Name" })).toHaveClass(
       "h-control-height",
       "bg-input-background",
-      "border-border",
+      "border-input-border",
       "px-field-inline",
       "[font-size:var(--text-input)]",
       "placeholder:[font-size:var(--text-input)]",
@@ -35,7 +35,7 @@ describe("Textarea", () => {
     expect(screen.getByRole("textbox", { name: "Description" })).toHaveClass(
       "min-h-28",
       "resize-y",
-      "border-border",
+      "border-input-border",
       "px-field-inline",
       "[font-size:var(--text-input)]",
       "placeholder:[font-size:var(--text-input)]",

@@ -41,6 +41,9 @@
   --select-selected: var(--neutral-700);
   --select-selected-foreground: var(--neutral-50);
   --input-background: transparent;
+  --input-border: var(--neutral-300);
+  --input-border-hover: var(--neutral-500);
+  --input-border-active: var(--neutral-700);
   --table-border: var(--neutral-500);
   --placeholder: var(--neutral-300);
   --password-icon: var(--neutral-700);
@@ -105,6 +108,9 @@
   --color-select-selected: var(--select-selected);
   --color-select-selected-foreground: var(--select-selected-foreground);
   --color-input-background: var(--input-background);
+  --color-input-border: var(--input-border);
+  --color-input-border-hover: var(--input-border-hover);
+  --color-input-border-active: var(--input-border-active);
   --color-table-border: var(--table-border);
   --color-disabled: var(--disabled);
   --color-disabled-foreground: var(--disabled-foreground);
@@ -265,7 +271,7 @@
 
   /* Authentication layout */
   --spacing-auth-tabs-height: 3.5rem;
-  --spacing-auth-content-width: 34.625rem;
+  --spacing-auth-content-width: 35rem;
   --spacing-auth-page-inline: var(--page-inline-space);
   --spacing-auth-page-top-tablet: 2.5rem;
   --spacing-auth-page-bottom: 4rem;
@@ -301,7 +307,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     /* Surfaces and content */
     --background: var(--neutral-950);
     --card: var(--neutral-950);
@@ -321,10 +327,11 @@
     --select-hover-foreground: var(--neutral-50);
     --select-selected: var(--neutral-50);
     --select-selected-foreground: var(--neutral-950);
-    --input-background: var(--neutral-700);
+    --input-border: var(--neutral-700);
+    --input-border-active: var(--neutral-300);
     --input-disabled-background: var(--neutral-700);
-    --placeholder: var(--neutral-500);
-    --password-icon: var(--neutral-500);
+    --placeholder: var(--neutral-700);
+    --password-icon: var(--neutral-300);
     --table-border: var(--neutral-700);
     --employee-avatar: var(--neutral-700);
     --employee-avatar-foreground: var(--neutral-950);
@@ -346,3 +353,49 @@
 
   }
 }
+
+:root[data-theme="dark"] {
+    /* Surfaces and content */
+    --background: var(--neutral-950);
+    --card: var(--neutral-950);
+    --card-foreground: var(--neutral-50);
+    --foreground: var(--neutral-50);
+    --muted-foreground: var(--neutral-300);
+    --profile-name: var(--neutral-50);
+    --skill-novice-track: var(--dark-surface-accent);
+    --skill-advanced: #29b6f6;
+    --skill-advanced-track: #145b7b;
+    --skill-competent: #66bb6a;
+    --skill-competent-track: #335d35;
+    --skill-proficient-track: #7f5c00;
+
+    /* Form controls */
+    --select-hover: var(--neutral-700);
+    --select-hover-foreground: var(--neutral-50);
+    --select-selected: var(--neutral-50);
+    --select-selected-foreground: var(--neutral-950);
+    --input-border: var(--neutral-700);
+    --input-border-active: var(--neutral-300);
+    --input-disabled-background: var(--neutral-700);
+    --placeholder: var(--neutral-700);
+    --password-icon: var(--neutral-300);
+    --table-border: var(--neutral-700);
+    --employee-avatar: var(--neutral-700);
+    --employee-avatar-foreground: var(--neutral-950);
+    --employee-chevron: var(--neutral-500);
+    --table-search-icon: var(--neutral-300);
+    --table-search-placeholder: var(--neutral-700);
+    --pagination-border: var(--neutral-700);
+    --pagination-icon: var(--neutral-500);
+    --pagination-text: var(--neutral-50);
+
+    --sidebar: var(--neutral-950);
+    --sidebar-foreground: var(--neutral-50);
+    --sidebar-accent: var(--dark-surface-accent);
+    --sidebar-accent-foreground: var(--neutral-50);
+    --sidebar-footer-menu-border: var(--neutral-700);
+    --sidebar-muted: var(--neutral-300);
+    --sidebar-logo: var(--neutral-50);
+    --sidebar-logo-foreground: var(--neutral-950);
+
+  }

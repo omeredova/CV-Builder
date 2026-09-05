@@ -28,3 +28,5 @@ export {
 export { employeeQuery, type EmployeeQueryData } from "./api/employeeQuery";
 export { updateEmployeeNamesCache } from "./api/updateEmployeeNamesCache";
 export { fetchEmploymentOptions } from "./api/fetchEmploymentOptions";
+export { currentAccountQuery, type CurrentAccountQueryData } from "./api/currentAccountQuery";
+export { useCurrentAccount } from "./model/useCurrentAccount";

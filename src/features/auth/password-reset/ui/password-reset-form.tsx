@@ -73,6 +73,7 @@ export function PasswordResetForm({ resetError, token }: PasswordResetFormProps)
       <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
         <div className="flex w-full flex-col items-center gap-auth-fields-gap">
           <PasswordConfirmationFields
+            containerClassName="w-full"
             confirmPasswordPlaceholder="Confirm password"
             errors={errors}
             onBlur={touchField}
