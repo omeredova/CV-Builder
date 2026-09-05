@@ -13,6 +13,7 @@ import {
   type UserCreatedAtQueryVariables,
 } from "@/entities/employee";
 import { AvatarUploader, useProfileEdit, type ProfileChanges } from "@/features/profile-edit";
+import { useSendVerification } from "@/features/auth";
 import { formatUnixDate } from "@/shared/lib/formatters";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/empty";
 import { Input } from "@/shared/ui/input";
@@ -66,6 +67,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
   const { data: currentProfile, loading: isCheckingOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
   const canUpload = currentProfile?.me.id === employee.id;
   const profile = useProfileEdit(employee, canUpload, onProfileChange);
+  const verification = useSendVerification();
   const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
   const { data, error, loading } = useQuery<
     UserCreatedAtQueryData,
@@ -173,8 +175,9 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
             {canUpload && (
               <>
                 {profile.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{profile.error}</p>}
+                {verification.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{verification.error}</p>}
                 <div className="col-start-2 mt-4 flex w-full justify-end gap-6 max-table-compact:col-start-1 max-table-compact:mt-5">
-                  <Button type="button" size="default" variant="secondary">VERIFY EMAIL</Button>
+                  <Button type="button" size="default" variant="secondary" disabled={verification.isLoading} aria-busy={verification.isLoading} onClick={() => { if (canUpload) void verification.sendVerification(employee.email); }}>VERIFY EMAIL</Button>
                   <Button type="submit" size="default" variant="primary" disabled={!profile.canSubmit} aria-busy={profile.loading}>UPDATE</Button>
                 </div>
               </>

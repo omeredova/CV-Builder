@@ -1,5 +1,6 @@
 export {
   EmailVerificationForm,
+  useSendVerification,
   type EmailVerificationFormProps,
   type VerificationError,
 } from "./email-verification";

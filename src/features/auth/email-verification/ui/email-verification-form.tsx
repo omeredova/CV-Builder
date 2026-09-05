@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, Suspense, useState } from "react";
 
 import { useApiLoaderNavigation } from "@/shared/api/use-api-loader-navigation";
 import { Button } from "@/shared/ui/button";
@@ -14,6 +14,8 @@ import { VERIFICATION_CODE_LENGTH, validateVerificationCode } from "../model/val
 import type { VerificationError } from "../model/verificationError";
 import { AuthFormCard } from "../../ui/AuthFormCard";
 import { AuthFormMessage } from "../../ui/AuthFormMessage";
+
+import { VerificationSentNotice } from "./verification-sent-notice";
 
 export interface EmailVerificationFormProps {
   verificationError?: VerificationError;
@@ -60,6 +62,9 @@ export function EmailVerificationForm({ verificationError }: EmailVerificationFo
       title="Email verification"
     >
       <form className="flex w-full flex-col items-center" noValidate onSubmit={handleSubmit}>
+        <Suspense fallback={null}>
+          <VerificationSentNotice />
+        </Suspense>
         <InputOTP
           aria-describedby={error ? "verification-code-error" : undefined}
           aria-invalid={Boolean(error)}

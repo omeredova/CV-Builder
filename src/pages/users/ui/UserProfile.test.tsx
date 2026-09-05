@@ -2,13 +2,19 @@ import { gql, InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { currentProfileQuery, userCreatedAtQuery, type Employee } from "@/entities/employee";
 
 import { updateProfileMutation } from "@/features/profile-edit";
 
+import { sendVerificationMutation } from "@/features/auth/email-verification/api/sendVerificationMutation";
+
 import { UserProfile } from "./UserProfile";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+beforeEach(() => { push.mockReset(); sessionStorage.clear(); });
 
 const employee: Employee = {
   avatar: null,
@@ -23,6 +29,55 @@ const employee: Employee = {
 afterEach(() => window.history.replaceState(null, "", "/"));
 
 describe("UserProfile", () => {
+  it("sends verification once to the registered email before redirecting", async () => {
+    const user = userEvent.setup();
+    const result = vi.fn(() => ({ data: { sendVerification: null } }));
+    sessionStorage.setItem("verificationStartedAt", "1");
+    render(
+      <MockedProvider mocks={[
+        { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: sendVerificationMutation, variables: { email: employee.email } }, delay: 100, result },
+      ]}>
+        <UserProfile employee={employee} />
+      </MockedProvider>,
+    );
+    const button = await screen.findByRole("button", { name: "VERIFY EMAIL" });
+    await user.dblClick(button);
+    expect(button).toBeDisabled();
+    expect(push).not.toHaveBeenCalled();
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/verify-email?sent=true"));
+    expect(result).toHaveBeenCalledTimes(1);
+    expect(Number(sessionStorage.getItem("verificationStartedAt"))).toBeGreaterThan(1);
+  });
+
+  it.each(["network", "graphql"])("stays on the profile after a %s failure and allows retry", async (failure) => {
+    const user = userEvent.setup();
+    const request = { query: sendVerificationMutation, variables: { email: employee.email } };
+    window.history.replaceState(null, "", "/users/user-1/profile");
+    sessionStorage.setItem("verificationStartedAt", "1");
+    render(
+      <MockedProvider mocks={[
+        { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request, ...(failure === "network" ? { error: new Error("Offline") } : { result: { errors: [{ message: "Failed" }] } }) },
+        { request, result: { data: { sendVerification: null } } },
+      ]}>
+        <UserProfile employee={employee} />
+      </MockedProvider>,
+    );
+    const button = await screen.findByRole("button", { name: "VERIFY EMAIL" });
+    await user.click(button);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Failed to send verification email");
+    expect(push).not.toHaveBeenCalled();
+    expect(window.location.pathname).toBe("/users/user-1/profile");
+    expect(sessionStorage.getItem("verificationStartedAt")).toBe("1");
+    expect(button).toBeEnabled();
+    await user.click(button);
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/verify-email?sent=true"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it.each(["/new-avatar.png", null])("preserves an updated avatar (%s) across profile tabs before names are saved", async (avatar) => {
     const user = userEvent.setup();
     const mocks = [
@@ -127,6 +182,7 @@ describe("UserProfile", () => {
     expect(screen.getByRole("textbox", { name: "First Name" }).hasAttribute("disabled")).toBe(!visible);
     expect(screen.getByRole("textbox", { name: "Last Name" }).hasAttribute("disabled")).toBe(!visible);
     expect(!!screen.queryByRole("button", { name: "UPDATE" })).toBe(visible);
+    expect(!!screen.queryByRole("button", { name: "VERIFY EMAIL" })).toBe(visible);
   });
 
   it.each([false, true])("validates and saves names with normalized profile: %s", async (normalized) => {
@@ -168,7 +224,6 @@ describe("UserProfile", () => {
     fireEvent.change(first, { target: { value: "Ada" } });
     await user.type(last, "Lovelace");
     expect(update).toBeEnabled();
-    await user.click(screen.getByRole("button", { name: "VERIFY EMAIL" }));
     expect(onProfileChange).not.toHaveBeenCalled();
     await user.click(update);
     expect(update).toBeDisabled();

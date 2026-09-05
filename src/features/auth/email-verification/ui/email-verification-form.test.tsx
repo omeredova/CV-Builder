@@ -21,14 +21,27 @@ vi.mock("../model/useEmailVerification", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push }),
+  useSearchParams: () => new URLSearchParams(window.location.search),
 }));
 
 describe("EmailVerificationForm", () => {
   beforeEach(() => {
+    window.history.replaceState(null, "", "/");
     clearError.mockReset();
     push.mockReset();
     verifyEmail.mockReset();
     verifyEmail.mockResolvedValue(true);
+  });
+
+  it("shows the sent notification after a successful send redirect", () => {
+    window.history.replaceState(null, "", "/verify-email?sent=true");
+    render(<EmailVerificationForm />);
+    expect(screen.getByRole("status")).toHaveTextContent("Verification email has been sent");
+  });
+
+  it("does not claim an email was sent when opened directly", () => {
+    render(<EmailVerificationForm />);
+    expect(screen.queryByText("Verification email has been sent")).not.toBeInTheDocument();
   });
 
   it("accepts six digits and enables confirmation", async () => {
