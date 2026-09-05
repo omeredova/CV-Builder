@@ -1,0 +1,62 @@
+import Link from "next/link";
+
+import { cn } from "@/shared/lib/class-names";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+
+export interface NavigationTabItem<Value extends string> {
+  href?: string;
+  id?: string;
+  panelId?: string;
+  label: string;
+  value: Value;
+}
+
+export interface NavigationTabsProps<Value extends string> {
+  activeValue: Value;
+  ariaLabel: string;
+  className?: string;
+  items: readonly NavigationTabItem<Value>[];
+  onValueChange?: (value: Value) => void;
+}
+
+export function NavigationTabs<Value extends string>({
+  activeValue,
+  ariaLabel,
+  className,
+  items,
+  onValueChange,
+}: NavigationTabsProps<Value>) {
+  return (
+    <Tabs className={cn("h-auth-tabs-height w-fit max-w-full", className)}>
+      <TabsList
+        aria-label={ariaLabel}
+        style={{
+          gridTemplateColumns: `repeat(${items.length}, var(--spacing-navigation-tab-width))`,
+        }}
+      >
+        {items.map(({ href, label, value, id, panelId }) => {
+          const isActive = activeValue === value;
+
+          return href ? (
+            <TabsTrigger active={isActive} asChild key={value} id={id} aria-controls={panelId}>
+              <Link aria-current={isActive ? "page" : undefined} href={href}>
+                {label}
+              </Link>
+            </TabsTrigger>
+          ) : (
+            <TabsTrigger
+              active={isActive}
+              id={id}
+              aria-controls={panelId}
+              key={value}
+              onClick={() => onValueChange?.(value)}
+              type="button"
+            >
+              {label}
+            </TabsTrigger>
+          );
+        })}
+      </TabsList>
+    </Tabs>
+  );
+}
