@@ -22,6 +22,8 @@ import { FormField } from "@/shared/ui/form-field";
 import { Button } from "@/shared/ui/button";
 import { NavigationTabs } from "@/shared/ui/navigation-tabs";
 import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
+import { UserSkills } from "@/widgets/user-skills";
+import { SkillActions } from "@/entities/skill";
 
 export interface UserProfileProps {
   employee: Employee;
@@ -191,6 +193,10 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
               </>
             )}
           </form>
+        </div>
+      ) : activeTab === "skills" ? (
+        <div role="tabpanel" id="employee-panel-skills" aria-labelledby="employee-tab-skills" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <UserSkills key={employee.id} userId={employee.id} actions={canUpload && !isCheckingOwner ? <SkillActions /> : undefined} />
         </div>
       ) : (
         <div role="tabpanel" id={`employee-panel-${activeTab}`} aria-labelledby={`employee-tab-${activeTab}`} tabIndex={0} className="grid min-h-[calc(100vh-var(--spacing-breadcrumb-header)-var(--spacing-profile-tabs-height))] place-items-center px-profile-inline">

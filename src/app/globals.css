@@ -17,8 +17,15 @@ body {
 button,
 input {
   font-family: inherit;
-  font-size: inherit;
   line-height: inherit;
+}
+
+button {
+  font-size: var(--text-sm);
+}
+
+input {
+  font-size: inherit;
 }
 
 [data-slot="input"],

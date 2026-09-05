@@ -25,6 +25,13 @@
   --foreground: var(--neutral-950);
   --muted-foreground: var(--neutral-700);
   --profile-name: var(--neutral-950);
+  --skill-novice: var(--neutral-700);
+  --skill-novice-track: var(--neutral-500);
+  --skill-advanced: #0288d1;
+  --skill-advanced-track: #9ed1ed;
+  --skill-competent: #2e7d32;
+  --skill-competent-track: #afcdb1;
+  --skill-proficient-track: #ffe49e;
 
   /* Form controls */
   --border: var(--neutral-500);
@@ -126,6 +133,16 @@
   --color-sidebar-logo-foreground: var(--sidebar-logo-foreground);
   --color-loader-overlay: var(--loader-overlay);
   --color-loader-track: var(--loader-track);
+  /* Skill mastery, from the Notifications progress scale. */
+  --color-skill-name: var(--neutral-700);
+  --color-skill-novice: var(--skill-novice);
+  --color-skill-novice-track: var(--skill-novice-track);
+  --color-skill-advanced: var(--skill-advanced);
+  --color-skill-advanced-track: var(--skill-advanced-track);
+  --color-skill-competent: var(--skill-competent);
+  --color-skill-competent-track: var(--skill-competent-track);
+  --color-skill-proficient: #ffb800;
+  --color-skill-proficient-track: var(--skill-proficient-track);
 
   /* Typography */
   --font-sans: "Roboto", Arial, sans-serif;
@@ -284,6 +301,12 @@
     --foreground: var(--neutral-50);
     --muted-foreground: var(--neutral-300);
     --profile-name: var(--neutral-50);
+    --skill-novice-track: var(--dark-surface-accent);
+    --skill-advanced: #29b6f6;
+    --skill-advanced-track: #145b7b;
+    --skill-competent: #66bb6a;
+    --skill-competent-track: #335d35;
+    --skill-proficient-track: #7f5c00;
 
     /* Form controls */
     --select-hover: var(--neutral-700);
