@@ -16,6 +16,7 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
+        link: "rounded-sm underline-offset-4 hover:underline",
         primary:
           cn(
             "w-button-width rounded-control bg-primary text-on-primary shadow-primary hover:border hover:border-primary hover:bg-transparent hover:text-primary active:border active:border-primary active:bg-primary-active active:text-primary",
@@ -42,6 +43,7 @@ export const buttonVariants = cva(
           "rounded-full border border-transparent bg-transparent text-pagination-icon hover:bg-sidebar-accent",
       },
       size: {
+        content: "h-auto p-0",
         default: "h-control-height",
         icon: "size-control-height p-0",
         pagination:

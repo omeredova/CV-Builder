@@ -5,6 +5,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 
 export interface NavigationTabItem<Value extends string> {
   href?: string;
+  id?: string;
+  panelId?: string;
   label: string;
   value: Value;
 }
@@ -32,11 +34,11 @@ export function NavigationTabs<Value extends string>({
           gridTemplateColumns: `repeat(${items.length}, var(--spacing-navigation-tab-width))`,
         }}
       >
-        {items.map(({ href, label, value }) => {
+        {items.map(({ href, label, value, id, panelId }) => {
           const isActive = activeValue === value;
 
           return href ? (
-            <TabsTrigger active={isActive} asChild key={value}>
+            <TabsTrigger active={isActive} asChild key={value} id={id} aria-controls={panelId}>
               <Link aria-current={isActive ? "page" : undefined} href={href}>
                 {label}
               </Link>
@@ -44,6 +46,8 @@ export function NavigationTabs<Value extends string>({
           ) : (
             <TabsTrigger
               active={isActive}
+              id={id}
+              aria-controls={panelId}
               key={value}
               onClick={() => onValueChange?.(value)}
               type="button"

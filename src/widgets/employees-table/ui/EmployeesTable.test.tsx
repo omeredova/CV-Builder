@@ -7,7 +7,7 @@ import type { Employee } from "@/entities/employee";
 
 import { EmployeesTable } from "./EmployeesTable";
 
-const employee: Employee = {
+const employee: Employee = { departmentId: null, positionId: null,
   avatar: null,
   department: "Engineering",
   email: "ada@example.com",

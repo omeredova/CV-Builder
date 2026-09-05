@@ -8,7 +8,7 @@ describe("mapUsersQueryResult", () => {
       mapUsersQueryResult({
         items: [
           {
-            department: { name: "Engineering" },
+            department: { id: "d1", name: "Engineering" },
             email: "ada@example.com",
             id: "employee-1",
             position: null,
@@ -29,6 +29,8 @@ describe("mapUsersQueryResult", () => {
         {
           avatar: "https://example.com/avatar.png",
           department: "Engineering",
+          departmentId: "d1",
+          positionId: null,
           email: "ada@example.com",
           firstName: "Ada",
           id: "employee-1",

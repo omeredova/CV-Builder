@@ -9,6 +9,9 @@ import {
 import { Observable } from "@apollo/client/utilities";
 import { describe, expect, it, vi } from "vitest";
 
+import { verifyMailMutation } from "@/features/auth/email-verification/api/verifyMailMutation";
+import { sendVerificationMutation } from "@/features/auth/email-verification/api/sendVerificationMutation";
+
 import { createAuthenticationErrorLink, isUnauthorizedError } from "./authenticationErrorLink";
 
 const viewerQuery = gql`
@@ -31,6 +34,9 @@ describe("isUnauthorizedError", () => {
     });
 
     expect(isUnauthorizedError(serverError)).toBe(true);
+    for (const message of ["unauthorized", "Unauthorized", "jwt expired"]) {
+      expect(isUnauthorizedError(new CombinedGraphQLErrors({ errors: [{ message }] }))).toBe(true);
+    }
     expect(isUnauthorizedError(createGraphqlError("UNAUTHENTICATED"))).toBe(true);
     expect(isUnauthorizedError(createGraphqlError("FORBIDDEN"))).toBe(false);
   });
@@ -73,6 +79,56 @@ describe("authentication error link", () => {
     expect(refreshSession).toHaveBeenCalledOnce();
     expect(logoutSession).not.toHaveBeenCalled();
     expect(requestHeaders[1]).toMatchObject({ authorization: "Bearer new-access-token" });
+  });
+
+  it.each([
+    { mutation: verifyMailMutation, variables: { mail: { otp: "123456" } }, field: "verifyMail" },
+    { mutation: sendVerificationMutation, variables: { email: "owner@example.com" }, field: "sendVerification" },
+  ])("refreshes and retries $field without changing its variables", async ({ mutation, variables, field }) => {
+    const refreshSession = vi.fn().mockResolvedValue("new-access-token");
+    const logoutSession = vi.fn();
+    const requests: Array<{ headers: Record<string, string>; variables: unknown }> = [];
+    const client = new ApolloClient({
+      cache: new InMemoryCache(),
+      link: ApolloLink.from([
+        createAuthenticationErrorLink({ logout: logoutSession, refreshAccessToken: refreshSession }),
+        new ApolloLink((operation) => new Observable((observer) => {
+          requests.push({ headers: operation.getContext().headers, variables: operation.variables });
+          if (requests.length === 1) {
+            observer.error(createGraphqlError("UNAUTHENTICATED"));
+            return;
+          }
+          observer.next({ data: { [field]: null } });
+          observer.complete();
+        })),
+      ]),
+    });
+
+    await expect(client.mutate({
+      mutation, variables, context: { headers: { authorization: "Bearer expired-access-token" } },
+    })).resolves.toMatchObject({ data: { [field]: null } });
+    expect(refreshSession).toHaveBeenCalledOnce();
+    expect(logoutSession).not.toHaveBeenCalled();
+    expect(requests).toEqual([
+      { headers: { authorization: "Bearer expired-access-token" }, variables },
+      { headers: { authorization: "Bearer new-access-token" }, variables },
+    ]);
+  });
+
+  it("does not refresh the session for an expired verification code", async () => {
+    const refreshSession = vi.fn();
+    const error = new CombinedGraphQLErrors({ errors: [{ message: "otpExpired" }] });
+    const client = new ApolloClient({
+      cache: new InMemoryCache(),
+      link: ApolloLink.from([
+        createAuthenticationErrorLink({ logout: vi.fn(), refreshAccessToken: refreshSession }),
+        new ApolloLink(() => new Observable((observer) => observer.error(error))),
+      ]),
+    });
+    await expect(client.mutate({
+      mutation: verifyMailMutation, variables: { mail: { otp: "123456" } },
+    })).rejects.toBe(error);
+    expect(refreshSession).not.toHaveBeenCalled();
   });
 
   it("logs out and returns the original error when refresh fails", async () => {

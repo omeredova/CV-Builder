@@ -35,3 +35,8 @@ input:-webkit-autofill:focus {
   box-shadow: 0 0 0 1000px var(--background) inset;
   -webkit-text-fill-color: var(--foreground);
 }
+
+@keyframes progress-indeterminate {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}

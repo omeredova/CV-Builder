@@ -1,12 +1,14 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import { forwardRef } from "react";
 
-import { Input } from "@/components/ui/input";
+import { Input, type InputProps } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/shared/lib/class-names";
 import { primaryFocusRingClassName } from "@/shared/ui/styles";
 import { PasswordVisibilityIcon } from "@/shared/ui/icons/PasswordVisibilityIcon";
 
-export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface FormFieldProps extends InputProps {
+  containerClassName?: string;
+  labelPlacement?: "floating" | "above";
   error?: string;
   label: string;
   onPasswordVisibilityToggle?: () => void;
@@ -18,14 +20,17 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
   (
     {
       className,
+      containerClassName,
       disabled,
       error,
       id,
       label,
+      labelPlacement = "floating",
       onPasswordVisibilityToggle,
       passwordIcon = false,
       passwordVisible = false,
       type = "text",
+      variant = "default",
       ...props
     },
     ref,
@@ -33,13 +38,19 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     const describedBy = error ? `${id}-error` : undefined;
 
     return (
-      <div className="relative w-field-width max-w-full">
+      <div className={cn("relative max-w-full", containerClassName ?? "w-field-width")}>
+        {labelPlacement === "above" && (
+          <Label className="mb-field-label-gap block pl-field-inline text-xs font-normal text-muted-foreground" htmlFor={id}>
+            {label}
+          </Label>
+        )}
         <div className="relative">
           <Input
             aria-describedby={describedBy}
             aria-invalid={Boolean(error)}
             className={cn(
               "peer",
+              variant === "active" && "bg-transparent",
               passwordIcon && "pr-field-icon",
               passwordIcon && !error && "focus:border-foreground",
               className,
@@ -48,10 +59,10 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             id={id}
             ref={ref}
             type={type}
-            variant={error ? "invalid" : "default"}
+            variant={error ? "invalid" : variant}
             {...props}
           />
-          <Label
+          {labelPlacement === "floating" && <Label
             className={cn(
               "pointer-events-none absolute bottom-full left-field-inline z-10 mb-field-label-gap text-xs font-normal leading-none text-muted-foreground opacity-100 transition-opacity peer-placeholder-shown:opacity-0 peer-autofill:opacity-100 peer-focus:opacity-100 peer-disabled:opacity-100",
               error && "text-primary peer-placeholder-shown:opacity-100",
@@ -59,7 +70,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             htmlFor={id}
           >
             {label}
-          </Label>
+          </Label>}
           {passwordIcon ? (
             <button
               aria-label={passwordVisible ? "Hide password" : "Show password"}

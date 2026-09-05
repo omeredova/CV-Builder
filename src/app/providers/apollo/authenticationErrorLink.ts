@@ -10,7 +10,6 @@ const operationsWithoutTokenRefresh = new Set([
   "ResetPassword",
   "SignIn",
   "SignUp",
-  "VerifyMail",
 ]);
 
 interface AuthenticationDependencies {
@@ -29,7 +28,8 @@ export function isUnauthorizedError(error: unknown): boolean {
 
   return error.errors.some(
     (graphQLError) =>
-      graphQLError.message === "unauthorized" ||
+      graphQLError.message.toLowerCase() === "unauthorized" ||
+      graphQLError.message === "jwt expired" ||
       graphQLError.extensions?.code === "UNAUTHENTICATED",
   );
 }

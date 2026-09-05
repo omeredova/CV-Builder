@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         pathname: "/cv-gen-cloud/image/upload/**",
         protocol: "https",
       },
+      {
+        hostname: "res.cloudinary.com",
+        pathname: "/ze7hzrlr/image/upload/**",
+        protocol: "https",
+      },
     ],
   },
   reactStrictMode: true,
