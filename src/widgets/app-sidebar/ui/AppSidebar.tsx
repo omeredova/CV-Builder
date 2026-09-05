@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { EmployeeAvatar, useCurrentAccount } from "@/entities/employee";
 import { SignOutButton } from "@/features/auth";
 import { cn } from "@/shared/lib/class-names";
 import {
@@ -23,7 +24,6 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import { CvBuilderLogo } from "@/shared/ui/icons/CvBuilderLogo";
 import { SidebarChevronIcon } from "@/shared/ui/icons/SidebarChevronIcon";
-import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import {
   Sidebar,
   SidebarContent,
@@ -50,6 +50,8 @@ export function isNavigationItemActive(pathname: string, href: string): boolean 
 }
 
 export function AppSidebar() {
+  const { account } = useCurrentAccount();
+  const profileName = [account?.first_name, account?.last_name].filter(Boolean).join(" ") || account?.email || "Your account";
   const pathname = usePathname() ?? "/";
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -121,16 +123,19 @@ export function AppSidebar() {
               className="flex h-sidebar-footer w-full items-center gap-sidebar-profile overflow-hidden whitespace-nowrap text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
               type="button"
             >
-              <Avatar aria-label="Name Surname">
-                <AvatarFallback>N</AvatarFallback>
-              </Avatar>
+              <EmployeeAvatar
+                avatar={account?.avatar ?? null}
+                firstName={account?.first_name ?? null}
+                email={account?.email ?? profileName}
+                size="sidebar"
+              />
               <span
                 className={cn(
                   "truncate font-normal transition-opacity duration-sidebar max-dashboard:opacity-0",
                   isCollapsed && "opacity-0",
                 )}
               >
-                Name Surname
+                {profileName}
               </span>
             </button>
           </DropdownMenuTrigger>
@@ -146,11 +151,14 @@ export function AppSidebar() {
           >
             <DropdownMenuItem asChild>
               <SidebarFooterMenuButton
+                asChild
                 className={responsiveCollapsedFooterMenuClassName}
                 isCollapsed={isCollapsed}
               >
-                <UserRound aria-hidden="true" />
-                <span>Profile</span>
+                <Link href={account ? `/users/${account.id}/profile` : "/settings"}>
+                  <UserRound aria-hidden="true" />
+                  <span>Profile</span>
+                </Link>
               </SidebarFooterMenuButton>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

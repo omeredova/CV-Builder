@@ -16,7 +16,7 @@ export interface SelectProps {
   displayValue?: string;
   options: readonly SelectOption[];
   onValueChange: (value: string) => void;
-  onOpen: () => void;
+  onOpen?: () => void;
   required?: boolean;
   disabled?: boolean;
   loading?: boolean;
@@ -42,15 +42,22 @@ export function Select({ label, value, displayValue, options, onValueChange, onO
     return () => document.removeEventListener("pointerdown", closeOutside);
   }, [expanded]);
 
-  function openMenu(): void {
-    setActive(options.findIndex((option) => option.value === value));
+  useEffect(() => {
+    if (expanded && !loading && active >= 0) {
+      document.getElementById(`${id}-option-${active}`)?.scrollIntoView?.({ block: "nearest" });
+    }
+  }, [active, expanded, id, loading, options.length]);
+
+  function openMenu(index?: number): void {
+    const selectedIndex = options.findIndex((option) => option.value === value);
+    setActive(index ?? (selectedIndex >= 0 ? selectedIndex : options.length ? 0 : -1));
+    search.current = { text: "", time: 0 };
     setOpen(true);
-    onOpen();
+    onOpen?.();
   }
 
   function moveTo(index: number): void {
     setActive(index);
-    document.getElementById(`${id}-option-${index}`)?.scrollIntoView?.({ block: "nearest" });
   }
 
   function choose(index: number): void {
@@ -87,22 +94,36 @@ export function Select({ label, value, displayValue, options, onValueChange, onO
         onKeyDown={(event) => {
           if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
             event.preventDefault();
-            if (!expanded) { openMenu(); return; }
+            const last = options.length - 1;
+            if (!expanded) {
+              openMenu(event.key === "Home" ? 0 : event.key === "End" ? last : undefined);
+              return;
+            }
             if (!options.length || loading) return;
-            moveTo(event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 :
-              event.key === "ArrowDown" ? (active + 1) % options.length : (active <= 0 ? options.length : active) - 1);
+            moveTo(event.key === "Home" ? 0 : event.key === "End" ? last :
+              event.key === "ArrowDown" ? Math.min(active + 1, last) : Math.max(active - 1, 0));
           } else if (event.key === "Escape") {
             event.preventDefault();
             setOpen(false);
-          } else if (expanded && (event.key === "Enter" || event.key === " ")) {
+          } else if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            choose(active);
-          } else if (expanded && event.key.length === 1 && !event.ctrlKey && !event.metaKey) {
+            if (expanded) choose(active);
+            else openMenu();
+          } else if (event.key === "Tab") {
+            if (expanded) choose(active);
+          } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
             event.preventDefault();
-            const text = (Date.now() - search.current.time < 700 ? search.current.text : "") + event.key.toLowerCase();
+            if (loading || !options.length) return;
+            const previous = expanded && Date.now() - search.current.time < 700 ? search.current.text : "";
+            const text = previous + event.key.toLowerCase();
+            const repeated = [...text].every((character) => character === text[0]);
+            const prefix = repeated ? text[0] : text;
+            const start = expanded ? active : options.findIndex((option) => option.value === value);
+            const ordered = options.map((_, index) => (start + (repeated ? 1 : 0) + index + options.length) % options.length);
+            const index = ordered.find((index) => options[index].label.toLowerCase().startsWith(prefix));
+            if (!expanded) openMenu(index);
+            else if (index !== undefined) moveTo(index);
             search.current = { text, time: Date.now() };
-            const index = options.findIndex((option) => option.label.toLowerCase().startsWith(text));
-            if (index >= 0) moveTo(index);
           }
         }}
       >

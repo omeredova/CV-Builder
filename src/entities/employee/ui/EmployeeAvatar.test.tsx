@@ -52,3 +52,12 @@ describe("EmployeeAvatar", () => {
     expect(screen.getByText("G")).toBeInTheDocument();
   });
 });
+
+it("keeps the sidebar fallback and replaces it with the profile photo when provided", () => {
+  const { rerender } = render(<EmployeeAvatar avatar={null} email="ada@example.com" firstName="Ada" size="sidebar" />);
+  expect(screen.getByRole("img", { name: "Ada avatar" })).toHaveClass("bg-sidebar-primary");
+  expect(screen.getByText("A")).toBeVisible();
+  rerender(<EmployeeAvatar avatar="https://res.cloudinary.com/cv-gen-cloud/image/upload/avatar.png" email="ada@example.com" firstName="Ada" size="sidebar" />);
+  expect(screen.getByRole("img", { name: "Ada avatar" }).querySelector("img")).toHaveAttribute("src", expect.stringContaining("res.cloudinary.com"));
+  expect(screen.queryByText("A")).not.toBeInTheDocument();
+});

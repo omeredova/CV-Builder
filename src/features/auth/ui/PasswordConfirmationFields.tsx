@@ -1,45 +1,48 @@
 "use client";
 
-import { useState } from "react";
-
-import { FormField } from "@/shared/ui/form-field";
+import { PasswordField } from "@/shared/ui/password-field";
 
 import type {
   PasswordConfirmationErrors,
   PasswordConfirmationValues,
 } from "../model/validation";
 
-type PasswordField = keyof PasswordConfirmationValues;
+type PasswordConfirmationField = keyof PasswordConfirmationValues;
 
 export interface PasswordConfirmationFieldsProps {
   confirmPasswordPlaceholder?: string;
+  fieldClassName?: string;
+  containerClassName?: string;
   errors: PasswordConfirmationErrors;
-  onBlur: (field: PasswordField) => void;
-  onChange: (field: PasswordField, value: string) => void;
+  onBlur: (field: PasswordConfirmationField) => void;
+  onChange: (field: PasswordConfirmationField, value: string) => void;
   passwordId?: string;
+  confirmPasswordId?: string;
   passwordLabel?: string;
   passwordPlaceholder?: string;
-  touched: Partial<Record<PasswordField, boolean>>;
+  touched: Partial<Record<PasswordConfirmationField, boolean>>;
   values: PasswordConfirmationValues;
 }
 
 export function PasswordConfirmationFields({
   confirmPasswordPlaceholder = "Confirm Password",
   errors,
+  fieldClassName,
+  containerClassName,
   onBlur,
   onChange,
-  passwordId = "password",
+  passwordId,
+  confirmPasswordId,
   passwordLabel = "Password",
   passwordPlaceholder = "Password",
   touched,
   values,
 }: PasswordConfirmationFieldsProps) {
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-
   return (
     <>
-      <FormField
+      <PasswordField
+        className={fieldClassName}
+        containerClassName={containerClassName}
         autoComplete="new-password"
         error={touched.password ? errors.password : undefined}
         id={passwordId}
@@ -47,30 +50,22 @@ export function PasswordConfirmationFields({
         minLength={6}
         onBlur={() => onBlur("password")}
         onChange={(event) => onChange("password", event.target.value)}
-        onPasswordVisibilityToggle={() => setPasswordVisible((visible) => !visible)}
-        passwordIcon
-        passwordVisible={passwordVisible}
         placeholder={passwordPlaceholder}
         required
-        type={passwordVisible ? "text" : "password"}
         value={values.password}
       />
-      <FormField
+      <PasswordField
+        className={fieldClassName}
+        containerClassName={containerClassName}
         autoComplete="new-password"
         error={touched.confirmPassword ? errors.confirmPassword : undefined}
-        id="confirm-password"
+        id={confirmPasswordId}
         label="Confirm Password"
         minLength={6}
         onBlur={() => onBlur("confirmPassword")}
         onChange={(event) => onChange("confirmPassword", event.target.value)}
-        onPasswordVisibilityToggle={() =>
-          setConfirmPasswordVisible((visible) => !visible)
-        }
-        passwordIcon
-        passwordVisible={confirmPasswordVisible}
         placeholder={confirmPasswordPlaceholder}
         required
-        type={confirmPasswordVisible ? "text" : "password"}
         value={values.confirmPassword}
       />
     </>

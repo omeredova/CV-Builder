@@ -47,3 +47,6 @@ input:-webkit-autofill:focus {
   from { transform: translateX(-100%); }
   to { transform: translateX(300%); }
 }
+
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }

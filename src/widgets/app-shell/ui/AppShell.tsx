@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 
-import { AppSidebar } from "@/widgets/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/shared/ui/sidebar";
 
 interface AppShellProps {
   children: ReactNode;
+  sidebar: ReactNode;
 }
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, sidebar }: AppShellProps) {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {sidebar}
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );

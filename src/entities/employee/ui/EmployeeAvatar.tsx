@@ -7,7 +7,7 @@ export interface EmployeeAvatarProps {
   avatar: string | null;
   firstName: string | null;
   email: string;
-  size?: "profile" | "table";
+  size?: "profile" | "table" | "sidebar";
 }
 
 export function EmployeeAvatar({ avatar, firstName, email, size = "table" }: EmployeeAvatarProps) {
@@ -21,7 +21,9 @@ export function EmployeeAvatar({ avatar, firstName, email, size = "table" }: Emp
       className={
         size === "profile"
           ? "size-profile-avatar bg-employee-avatar [font-size:var(--text-profile-avatar)] text-employee-avatar-foreground"
-          : "size-10 bg-employee-avatar text-xl text-employee-avatar-foreground"
+          : size === "table"
+            ? "size-10 bg-employee-avatar text-xl text-employee-avatar-foreground"
+            : undefined
       }
       role="img"
     >

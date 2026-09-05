@@ -27,6 +27,9 @@ function createGraphqlError(code: string): CombinedGraphQLErrors {
 }
 
 describe("isUnauthorizedError", () => {
+  it("keeps incorrect current passwords as field errors without refreshing the session", () => {
+    expect(isUnauthorizedError(new CombinedGraphQLErrors({ errors: [{ message: "oldPasswordIncorrect", extensions: { code: "UNAUTHENTICATED" } }] }))).toBe(false);
+  });
   it("recognizes HTTP and GraphQL authentication errors", () => {
     const serverError = new ServerError("unauthorized", {
       bodyText: "",
