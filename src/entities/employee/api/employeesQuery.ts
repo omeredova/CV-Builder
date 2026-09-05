@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { employeeFields } from "./employeeFields";
 
 import type {
   EmployeeSortField,
@@ -7,10 +8,10 @@ import type {
 } from "../model/types";
 
 export interface UsersQueryItem {
-  department: { name: string } | null;
+  department: { id: string; name: string } | null;
   email: string;
   id: string;
-  position: { name: string } | null;
+  position: { id: string; name: string } | null;
   profile: {
     avatar: string | null;
     first_name: string | null;
@@ -58,19 +59,7 @@ export const employeesQuery = gql`
   query Employees($params: SearchPaginationInput) {
     users(params: $params) {
       items {
-        id
-        email
-        profile {
-          avatar
-          first_name
-          last_name
-        }
-        department {
-          name
-        }
-        position {
-          name
-        }
+        ...EmployeeFields
       }
       total
       page
@@ -78,4 +67,5 @@ export const employeesQuery = gql`
       total_pages
     }
   }
+  ${employeeFields}
 `;

@@ -28,6 +28,10 @@
 
   /* Form controls */
   --border: var(--neutral-500);
+  --select-hover: var(--neutral-500);
+  --select-hover-foreground: var(--neutral-950);
+  --select-selected: var(--neutral-700);
+  --select-selected-foreground: var(--neutral-50);
   --input-background: transparent;
   --table-border: var(--neutral-500);
   --placeholder: var(--neutral-300);
@@ -88,6 +92,10 @@
   --color-placeholder: var(--placeholder);
   --color-password-icon: var(--password-icon);
   --color-border: var(--border);
+  --color-select-hover: var(--select-hover);
+  --color-select-hover-foreground: var(--select-hover-foreground);
+  --color-select-selected: var(--select-selected);
+  --color-select-selected-foreground: var(--select-selected-foreground);
   --color-input-background: var(--input-background);
   --color-table-border: var(--table-border);
   --color-disabled: var(--disabled);
@@ -267,7 +275,7 @@
   --shadow-primary: var(--primary-shadow);
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
     /* Surfaces and content */
     --background: var(--neutral-950);
@@ -278,6 +286,10 @@
     --profile-name: var(--neutral-50);
 
     /* Form controls */
+    --select-hover: var(--neutral-700);
+    --select-hover-foreground: var(--neutral-50);
+    --select-selected: var(--neutral-50);
+    --select-selected-foreground: var(--neutral-950);
     --input-background: var(--neutral-700);
     --input-disabled-background: var(--neutral-700);
     --placeholder: var(--neutral-500);

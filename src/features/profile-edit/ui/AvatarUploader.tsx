@@ -6,6 +6,7 @@ import { useId, useRef } from "react";
 import { EmployeeAvatar, type Employee } from "@/entities/employee";
 
 import { cn } from "@/shared/lib/class-names";
+import { Progress } from "@/shared/ui/progress";
 import { Button } from "@/shared/ui/button";
 
 import { avatarAccept } from "../model/avatarFile";
@@ -19,7 +20,7 @@ export interface AvatarUploaderProps {
   error: string | null;
   status: ProfileEditStatus;
   onSelect: (file: File) => Promise<void>;
-  onRemove: () => void;
+  onRemove: () => Promise<void>;
 }
 
 export function AvatarUploader({
@@ -57,7 +58,7 @@ export function AvatarUploader({
             className="absolute right-0 top-0 size-6! rounded-full shadow-none hover:border-0 hover:bg-primary-active hover:text-on-primary disabled:opacity-60"
             size="icon"
             disabled={busy}
-            onClick={onRemove}
+            onClick={() => { void onRemove(); }}
             type="button"
           >
             <X aria-hidden="true" className="size-4" />
@@ -98,10 +99,11 @@ export function AvatarUploader({
             png, jpg, jpeg or gif no more than 5 MB
           </p>
           <div className="absolute inset-x-0 top-full pt-2 text-sm">
-            {status === "uploading" && (
-              <p className="text-muted-foreground" role="status">
-                Uploading avatar…
-              </p>
+            {(status === "reading" || status === "uploading") && (
+              <div className="space-y-2">
+                <Progress aria-label="Avatar upload progress" />
+                <p className="text-muted-foreground" role="status">{status === "reading" ? "Preparing avatar…" : "Uploading avatar…"}</p>
+              </div>
             )}
             {status === "removing" && (
               <p className="text-muted-foreground" role="status">

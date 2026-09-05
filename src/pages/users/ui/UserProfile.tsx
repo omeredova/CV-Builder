@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { ChevronDown, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -16,7 +16,8 @@ import { AvatarUploader, useProfileEdit, type ProfileChanges } from "@/features/
 import { useSendVerification } from "@/features/auth";
 import { formatUnixDate } from "@/shared/lib/formatters";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/empty";
-import { Input } from "@/shared/ui/input";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { Select } from "@/shared/ui/select";
 import { FormField } from "@/shared/ui/form-field";
 import { Button } from "@/shared/ui/button";
 import { NavigationTabs } from "@/shared/ui/navigation-tabs";
@@ -42,38 +43,18 @@ export function getUserProfileTab(pathname: string): UserProfileTab {
   return tab === "skills" || tab === "languages" ? tab : "profile";
 }
 
-interface ProfileFieldProps {
-  label: string;
-  select?: boolean;
-  value: string | null;
-}
-
-function ProfileField({ label, select = false, value }: ProfileFieldProps) {
-  return (
-    <label className="relative grid w-profile-field-width max-w-full gap-1 text-xs text-muted-foreground max-table-compact:w-full">
-      <span className="pl-field-inline">{label}</span>
-      <Input className={select ? "pr-12" : undefined} disabled value={value ?? ""} />
-      {select && (
-        <ChevronDown
-          aria-hidden="true"
-          className="absolute bottom-3 right-4 size-5 text-muted-foreground"
-        />
-      )}
-    </label>
-  );
-}
-
 export function UserProfile({ employee, initialTab = "profile", onClose, onProfileChange }: UserProfileProps) {
-  const { data: currentProfile, loading: isCheckingOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
-  const canUpload = currentProfile?.me.id === employee.id;
+  const { data: currentProfile, loading: isCheckingOwner, error: ownerError, refetch: retryOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
+  const canUpload = !ownerError && currentProfile?.me.id === employee.id;
   const profile = useProfileEdit(employee, canUpload, onProfileChange);
   const verification = useSendVerification();
   const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
-  const { data, error, loading } = useQuery<
+  const { data, error, loading, refetch: retryDate } = useQuery<
     UserCreatedAtQueryData,
     UserCreatedAtQueryVariables
   >(userCreatedAtQuery, {
     skip: activeTab !== "profile",
+    context: { skipGlobalLoader: true },
     variables: { id: employee.id },
   });
   const displayName = [profile.saved.firstName, profile.saved.lastName].filter(Boolean).join(" ") || employee.email;
@@ -113,12 +94,19 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
         activeValue={activeTab}
         ariaLabel="Employee details"
         className="ml-5 mt-1 h-profile-tabs-height"
-        items={profileTabs}
+        items={profileTabs.map((tab) => ({ ...tab, id: `employee-tab-${tab.value}`, panelId: `employee-panel-${tab.value}` }))}
         onValueChange={openTab}
       />
 
+      {ownerError && (
+        <div role="alert" className="mx-auto flex max-w-profile-content items-center justify-center gap-3 px-profile-inline py-3">
+          <p>Unable to check profile editing access.</p>
+          <Button variant="secondary" disabled={isCheckingOwner} onClick={() => { void retryOwner().catch(() => undefined); }}>Retry access check</Button>
+        </div>
+      )}
+
       {activeTab === "profile" ? (
-        <main className="mx-auto w-full max-w-profile-content px-profile-inline pt-profile-top">
+        <div role="tabpanel" id={`employee-panel-${activeTab}`} aria-labelledby={`employee-tab-${activeTab}`} tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline pt-profile-top">
           <section className="flex flex-col items-center text-center" aria-labelledby="user-profile-name">
             <AvatarUploader
               canUpload={canUpload}
@@ -138,13 +126,16 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
               {displayName}
             </h1>
             <p className="mt-2 text-base text-muted-foreground">{employee.email}</p>
-            <p className="mt-0.5 min-h-5 text-base text-foreground" aria-live="polite">
+            <div className="mt-0.5 flex min-h-6 items-center text-base text-foreground" aria-live="polite">
               {loading
-                ? "Loading member date…"
+                ? <Skeleton className="h-5 w-64" role="status" aria-label="Loading membership date" />
                 : error || !memberSince
-                  ? "Member date unavailable"
+                  ? <>
+                      <span>Member date unavailable</span>
+                      <Button className="ml-3" variant="secondary" onClick={() => { void retryDate().catch(() => undefined); }}>Retry membership date</Button>
+                    </>
                   : `A member since ${memberSince}`}
-            </p>
+            </div>
           </section>
 
           <form noValidate onSubmit={(event) => { event.preventDefault(); void profile.submit(); }} className="mx-auto mt-profile-fields grid w-profile-fields-width max-w-full grid-cols-2 gap-x-profile-column gap-y-profile-row max-table-compact:grid-cols-1 max-table-compact:gap-y-profile-row-compact max-table-compact:justify-items-center">
@@ -170,8 +161,25 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
                 error={canUpload ? field.error : undefined}
               />
             ))}
-            <ProfileField label="Department" select value={employee.department} />
-            <ProfileField label="Position" select value={employee.position} />
+            {(["department", "position"] as const).map((field) => {
+              const state = profile.employment.options[field];
+              const selected = profile.employment.selection[field];
+              const saved = profile.employment.saved[field];
+              return <Select
+                key={field}
+                required
+                label={field === "department" ? "Department" : "Position"}
+                className="w-profile-field-width max-table-compact:w-full"
+                value={selected?.id ?? profile.employment.saved[`${field}Id`] ?? ""}
+                displayValue={selected?.name ?? saved ?? undefined}
+                options={state.items.map((item) => ({ value: item.id, label: item.name }))}
+                disabled={!canUpload || profile.loading}
+                loading={state.loading}
+                error={canUpload ? state.error ?? profile.employment.validationErrors[field] : undefined}
+                onOpen={() => { void profile.employment.loadOptions(field); }}
+                onValueChange={(value) => profile.employment.select(field, value)}
+              />;
+            })}
             {canUpload && (
               <>
                 {profile.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{profile.error}</p>}
@@ -183,9 +191,9 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
               </>
             )}
           </form>
-        </main>
+        </div>
       ) : (
-        <main className="grid min-h-[calc(100vh-var(--spacing-breadcrumb-header)-var(--spacing-profile-tabs-height))] place-items-center px-profile-inline">
+        <div role="tabpanel" id={`employee-panel-${activeTab}`} aria-labelledby={`employee-tab-${activeTab}`} tabIndex={0} className="grid min-h-[calc(100vh-var(--spacing-breadcrumb-header)-var(--spacing-profile-tabs-height))] place-items-center px-profile-inline">
           <Empty>
             <EmptyHeader>
               <EmptyTitle>No {activeTab} yet</EmptyTitle>
@@ -194,7 +202,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
-        </main>
+        </div>
       )}
     </>
   );

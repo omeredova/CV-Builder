@@ -4,11 +4,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { currentProfileQuery, userCreatedAtQuery, type Employee } from "@/entities/employee";
+import { currentProfileQuery, userCreatedAtQuery, departmentsQuery, positionsQuery, type Employee } from "@/entities/employee";
 
 import { updateProfileMutation } from "@/features/profile-edit";
 
 import { sendVerificationMutation } from "@/features/auth/email-verification/api/sendVerificationMutation";
+
+import { createUpdateProfileMutation } from "@/features/profile-edit/api/updateProfileMutation";
 
 import { UserProfile } from "./UserProfile";
 
@@ -16,7 +18,7 @@ const { push } = vi.hoisted(() => ({ push: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 beforeEach(() => { push.mockReset(); sessionStorage.clear(); });
 
-const employee: Employee = {
+const employee: Employee = { departmentId: "d1", positionId: "p1",
   avatar: null,
   department: "React",
   email: "thorn_pear@icloud.com",
@@ -29,6 +31,78 @@ const employee: Employee = {
 afterEach(() => window.history.replaceState(null, "", "/"));
 
 describe("UserProfile", () => {
+  it("loads menus on demand, validates missing selections, and saves both fields with Update", async () => {
+    const user = userEvent.setup();
+    const onProfileChange = vi.fn();
+    const departmentResult = vi.fn(() => ({ data: { options: { items: [{ id: "d1", name: "React" }], total_pages: 1 } } }));
+    render(<MockedProvider mocks={[
+      { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: departmentsQuery, variables: { page: 1 } }, result: departmentResult },
+      { request: { query: positionsQuery, variables: { page: 1 } }, result: { data: { options: { items: [{ id: "p1", name: "Engineer" }], total_pages: 1 } } } },
+      { request: { query: createUpdateProfileMutation(true), variables: { profile: { userId: employee.id, first_name: employee.firstName, last_name: employee.lastName }, user: { userId: employee.id, departmentId: "d1", positionId: "p1" } } }, result: { data: { updateProfile: { id: employee.id, first_name: employee.firstName, last_name: employee.lastName }, updateUser: { id: employee.id, department: { id: "d1", name: "React" }, position: { id: "p1", name: "Engineer" } } } } },
+    ]}><UserProfile employee={{ ...employee, department: null, departmentId: null, position: null, positionId: null }} onProfileChange={onProfileChange} /></MockedProvider>);
+    const update = await screen.findByRole("button", { name: "UPDATE" });
+    expect(departmentResult).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("combobox", { name: "Department" }));
+    await user.click(await screen.findByRole("option", { name: "React" }));
+    expect(screen.getByRole("combobox", { name: "Position" })).toHaveAttribute("aria-invalid", "true");
+    expect(update).toBeDisabled();
+    await user.click(screen.getByRole("combobox", { name: "Position" }));
+    await user.click(await screen.findByRole("option", { name: "Engineer" }));
+    expect(update).toBeEnabled();
+    expect(onProfileChange).not.toHaveBeenCalled();
+    await user.click(update);
+    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ firstName: employee.firstName, lastName: employee.lastName, department: "React", departmentId: "d1", position: "Engineer", positionId: "p1" }));
+    expect(update).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Department" })).toHaveTextContent("React");
+  });
+
+  it("blocks name-only saves while required employment fields are missing", async () => {
+    const user = userEvent.setup();
+    render(<MockedProvider mocks={[
+      { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+    ]}><UserProfile employee={{ ...employee, departmentId: null, department: null, positionId: null, position: null }} /></MockedProvider>);
+    const update = await screen.findByRole("button", { name: "UPDATE" });
+    await user.type(screen.getByRole("textbox", { name: "First Name" }), "a");
+    expect(update).toBeDisabled();
+    for (const name of ["Department", "Position"]) {
+      expect(screen.getByRole("combobox", { name })).toHaveAttribute("aria-required", "true");
+      expect(screen.getByRole("combobox", { name })).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByText(`${name} is required`)).toBeInTheDocument();
+    }
+  });
+
+  it("retries failed ownership and membership requests without losing edits", async () => {
+    const user = userEvent.setup();
+    const ownerRequest = { query: currentProfileQuery };
+    const dateRequest = { query: userCreatedAtQuery, variables: { id: employee.id } };
+    render(<MockedProvider mocks={[
+      { request: ownerRequest, error: new Error("Offline") },
+      { request: ownerRequest, result: { data: { me: { id: employee.id } } } },
+      { request: dateRequest, error: new Error("Offline") },
+      { request: dateRequest, result: { data: { user: { created_at: "1705233600" } } } },
+    ]}><UserProfile employee={employee} /></MockedProvider>);
+    await user.click(await screen.findByRole("button", { name: "Retry access check" }));
+    await screen.findByRole("button", { name: "UPDATE" });
+    await user.type(screen.getByRole("textbox", { name: "First Name" }), "a");
+    await user.click(await screen.findByRole("button", { name: "Retry membership date" }));
+    expect(await screen.findByText("A member since Sun Jan 14 2024")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "First Name" })).toHaveValue("Rostislava");
+    expect(screen.queryByText("Unable to check profile editing access.")).not.toBeInTheDocument();
+  });
+
+  it("shows a membership-date skeleton until the date arrives", async () => {
+    render(<MockedProvider mocks={[
+      { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: 80, result: { data: { user: { created_at: "1705233600" } } } },
+    ]}><UserProfile employee={employee} /></MockedProvider>);
+    expect(screen.getByRole("status", { name: "Loading membership date" })).toHaveAttribute("data-slot", "skeleton");
+    expect(await screen.findByText("A member since Sun Jan 14 2024")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Loading membership date" })).not.toBeInTheDocument();
+  });
+
   it("sends verification once to the registered email before redirecting", async () => {
     const user = userEvent.setup();
     const result = vi.fn(() => ({ data: { sendVerification: null } }));
@@ -123,8 +197,8 @@ describe("UserProfile", () => {
     expect(screen.getByRole("link", { name: "Employees" })).toHaveAttribute("href", "/users");
     expect(screen.getByDisplayValue("Rostislav")).toBeDisabled();
     expect(screen.getByDisplayValue("Harlanov")).toBeDisabled();
-    expect(screen.getByDisplayValue("React")).toBeDisabled();
-    expect(screen.getByDisplayValue("Software Engineer")).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Department" })).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Position" })).toBeDisabled();
     expect(await screen.findByText("A member since Sun Jan 14 2024")).toBeInTheDocument();
   });
 
@@ -233,8 +307,8 @@ describe("UserProfile", () => {
       profile: { first_name: "Ada", last_name: "Lovelace", avatar: "avatar.png" },
     });
     expect(update).toBeDisabled();
-    expect(screen.getByDisplayValue("React")).toBeDisabled();
-    expect(screen.getByDisplayValue("Software Engineer")).toBeDisabled();
+    expect(screen.getByRole("combobox", { name: "Department" })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Position" })).toBeEnabled();
   });
 
   it("keeps edits available for retry when saving fails", async () => {

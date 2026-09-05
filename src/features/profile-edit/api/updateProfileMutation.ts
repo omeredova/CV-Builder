@@ -1,14 +1,14 @@
-import { gql } from "@apollo/client";
+import { gql, type DocumentNode } from "@apollo/client";
+import type { EmployeeEmployment, EmploymentUpdate } from "@/entities/employee";
 
 export interface UpdateProfileData {
   updateProfile?: { id: string; first_name: string | null; last_name: string | null } | null;
-  uploadAvatar?: string | null;
-  deleteAvatar?: null;
+  updateUser?: EmployeeEmployment | null;
 }
 
 export interface UpdateProfileVariables {
   profile: { userId: string; first_name: string; last_name: string };
-  avatar?: { userId: string; base64: string; size: number; type: string } | { userId: string };
+  user?: EmploymentUpdate;
 }
 
 export const updateProfileMutation = gql`
@@ -21,24 +21,21 @@ export const updateProfileMutation = gql`
   }
 `;
 
-export const updateProfileWithAvatarMutation = gql`
-  mutation UpdateProfileWithAvatar($profile: UpdateProfileInput!, $avatar: UploadAvatarInput!) {
-    uploadAvatar(avatar: $avatar)
+const updateProfileWithEmploymentMutation = gql`
+  mutation UpdateProfile($profile: UpdateProfileInput!, $user: UpdateUserInput!) {
     updateProfile(profile: $profile) {
       id
       first_name
       last_name
+    }
+    updateUser(user: $user) {
+      id
+      department { id name }
+      position { id name }
     }
   }
 `;
 
-export const updateProfileWithoutAvatarMutation = gql`
-  mutation UpdateProfileWithoutAvatar($profile: UpdateProfileInput!, $avatar: DeleteAvatarInput!) {
-    deleteAvatar(avatar: $avatar)
-    updateProfile(profile: $profile) {
-      id
-      first_name
-      last_name
-    }
-  }
-`;
+export function createUpdateProfileMutation(includeEmployment = false): DocumentNode {
+  return includeEmployment ? updateProfileWithEmploymentMutation : updateProfileMutation;
+}

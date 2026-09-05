@@ -1,3 +1,5 @@
+"use client";
+
 import { Slot } from "@radix-ui/react-slot";
 import type { ComponentPropsWithoutRef, HTMLAttributes } from "react";
 
@@ -12,10 +14,22 @@ export function Tabs({ className, ...props }: TabsProps) {
 
 export type TabsListProps = HTMLAttributes<HTMLDivElement>;
 
-export function TabsList({ className, ...props }: TabsListProps) {
+export function TabsList({ className, onKeyDown, ...props }: TabsListProps) {
   return (
     <div
       className={cn("grid h-full w-full grid-cols-2", className)}
+      onKeyDown={(event) => {
+        onKeyDown?.(event);
+        if (event.defaultPrevented || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[role="tab"]:not(:disabled)'));
+        const index = tabs.indexOf(event.target as HTMLElement);
+        if (index < 0) return;
+        event.preventDefault();
+        const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+        tabs[next]?.focus();
+        tabs[next]?.click();
+      }}
       role="tablist"
       {...props}
     />
@@ -38,6 +52,7 @@ export function TabsTrigger({
   return (
     <Component
       aria-selected={active}
+      tabIndex={active ? 0 : -1}
       className={cn(
         "flex h-full items-center justify-center border-b-2 border-transparent text-navigation-tab font-medium uppercase transition-colors hover:text-primary active:border-primary active:text-primary",
         primaryFocusRingClassName,

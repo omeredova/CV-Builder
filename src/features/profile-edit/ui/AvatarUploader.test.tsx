@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Employee } from "@/entities/employee";
 
-import { updateProfileWithAvatarMutation, updateProfileWithoutAvatarMutation } from "../api/updateProfileMutation";
+import { uploadAvatarMutation, deleteAvatarMutation } from "../api/avatarMutations";
 import { maxAvatarSize, validateAvatarFile } from "../model/avatarFile";
 import { AvatarUploader } from "./AvatarUploader";
 import { useProfileEdit, type ProfileChanges } from "../model/useProfileEdit";
@@ -24,7 +24,7 @@ function ProfileEditor({ employee, canUpload, onProfileChange }: {
   </>;
 }
 
-const employee: Employee = {
+const employee: Employee = { departmentId: null, positionId: null,
   id: "42",
   avatar: null,
   firstName: "Ada",
@@ -35,9 +35,8 @@ const employee: Employee = {
 };
 const file = new File(["image"], "avatar.png", { type: "image/png" });
 const request = {
-  query: updateProfileWithAvatarMutation,
+  query: uploadAvatarMutation,
   variables: {
-    profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" },
     avatar: {
       userId: "42",
       base64: "data:image/png;base64,aW1hZ2U=",
@@ -89,7 +88,7 @@ describe("AvatarUploader", () => {
     );
   });
 
-  it("previews selection and waits for UPDATE before uploading", async () => {
+  it("uploads on selection with inline progress and refreshes the avatar cache", async () => {
     const onProfileChange = vi.fn();
     const url = "https://res.cloudinary.com/demo/image/upload/avatar.png";
     const cache = new InMemoryCache();
@@ -114,7 +113,7 @@ describe("AvatarUploader", () => {
       <MockedProvider
         cache={cache}
         mocks={[
-          { request, delay: 100, result: { data: { uploadAvatar: url, updateProfile: { id: "42", first_name: "Ada", last_name: "Lovelace" } } } },
+          { request, delay: 100, result: { data: { uploadAvatar: url } } },
         ]}
       >
         <ProfileEditor
@@ -127,20 +126,16 @@ describe("AvatarUploader", () => {
     fireEvent.change(screen.getByLabelText("Select avatar image"), {
       target: { files: [file] },
     });
-    await waitFor(() =>
-      expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
-        "src",
-        request.variables.avatar.base64,
-      ),
-    );
-    expect(onProfileChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
-    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
-    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: url, firstName: "Ada", lastName: "Lovelace" }));
+    const progress = await screen.findByRole("progressbar", { name: "Avatar upload progress" });
+    expect(progress).not.toHaveAttribute("aria-valuenow");
+    expect(screen.getByRole("button", { name: "Upload avatar image" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeDisabled();
+    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: url }));
     expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
       "src",
       expect.stringContaining("cloudinary"),
     );
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Upload avatar image" }),
     ).toBeEnabled();
@@ -149,7 +144,7 @@ describe("AvatarUploader", () => {
     ).toMatchObject({ profile: { avatar: url } });
   });
 
-  it("retains the selected preview and allows UPDATE retry after an upload failure", async () => {
+  it("retains the saved avatar and allows selecting the file again after failure", async () => {
     const oldAvatar = "https://res.cloudinary.com/demo/image/upload/old.png";
     render(
       <MockedProvider mocks={[{ request, error: new Error("Upload failed") }]}>
@@ -162,29 +157,28 @@ describe("AvatarUploader", () => {
     fireEvent.change(screen.getByLabelText("Select avatar image"), {
       target: { files: [file] },
     });
-    await waitFor(() => expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled());
-    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to upload avatar",
     );
     expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
       "src",
-      request.variables.avatar.base64,
+      expect.stringContaining("old.png"),
     );
-    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload avatar image" })).toBeEnabled();
   });
 
-  it("removes an existing avatar and returns to the initial after saving", async () => {
+  it("removes an existing avatar immediately and returns to the initial", async () => {
     const onProfileChange = vi.fn();
     render(
       <MockedProvider
         mocks={[
           {
             request: {
-              query: updateProfileWithoutAvatarMutation,
-              variables: { profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" }, avatar: { userId: "42" } },
+              query: deleteAvatarMutation,
+              variables: { avatar: { userId: "42" } },
             },
-            result: { data: { deleteAvatar: null, updateProfile: { id: "42", first_name: "Ada", last_name: "Lovelace" } } },
+            result: { data: { deleteAvatar: null } },
           },
         ]}
       >
@@ -200,23 +194,22 @@ describe("AvatarUploader", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
     expect(onProfileChange).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
-    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: null, firstName: "Ada", lastName: "Lovelace" }));
+    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: null }));
     expect(screen.getByRole("img")).toHaveTextContent("A");
     expect(
       screen.queryByRole("button", { name: "Remove image" }),
     ).not.toBeInTheDocument();
   });
 
-  it("keeps removal pending for retry when saving fails", async () => {
+  it("preserves the old avatar when removal fails", async () => {
     const onProfileChange = vi.fn();
     render(
       <MockedProvider
         mocks={[
           {
             request: {
-              query: updateProfileWithoutAvatarMutation,
-              variables: { profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" }, avatar: { userId: "42" } },
+              query: deleteAvatarMutation,
+              variables: { avatar: { userId: "42" } },
             },
             error: new Error("Failed"),
           },
@@ -233,12 +226,12 @@ describe("AvatarUploader", () => {
       </MockedProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
-    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to remove avatar",
     );
     expect(onProfileChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload avatar image" })).toBeEnabled();
   });
 
   it("does not expose removal to another employee", () => {

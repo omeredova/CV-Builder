@@ -1,15 +1,17 @@
 import type { Employee, PaginatedEmployees } from "../model/types";
 import type { UsersQueryItem, UsersQueryResult } from "./employeesQuery";
 
-function mapUserToEmployee(user: UsersQueryItem): Employee {
+export function mapUserToEmployee(user: UsersQueryItem): Employee {
   return {
     avatar: user.profile.avatar,
     department: user.department?.name ?? null,
+    departmentId: user.department?.id ?? null,
     email: user.email,
     firstName: user.profile.first_name,
     id: user.id,
     lastName: user.profile.last_name ?? null,
     position: user.position?.name ?? null,
+    positionId: user.position?.id ?? null,
   };
 }
 
