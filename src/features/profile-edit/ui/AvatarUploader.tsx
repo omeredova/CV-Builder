@@ -9,29 +9,31 @@ import { cn } from "@/shared/lib/class-names";
 import { Button } from "@/shared/ui/button";
 
 import { avatarAccept } from "../model/avatarFile";
-import { useAvatarUpload } from "../model/useAvatarUpload";
+import type { ProfileEditStatus } from "../model/useProfileEdit";
 
 export interface AvatarUploaderProps {
   employee: Pick<Employee, "id" | "avatar" | "email" | "firstName">;
   canUpload: boolean;
   isCheckingOwner?: boolean;
-  onAvatarChange?: (avatar: string | null) => void;
+  avatar: string | null;
+  error: string | null;
+  status: ProfileEditStatus;
+  onSelect: (file: File) => Promise<void>;
+  onRemove: () => void;
 }
 
 export function AvatarUploader({
   employee,
   canUpload,
   isCheckingOwner = false,
-  onAvatarChange,
+  avatar,
+  error,
+  status,
+  onSelect,
+  onRemove,
 }: AvatarUploaderProps) {
   const input = useRef<HTMLInputElement>(null);
   const descriptionId = useId();
-  const { avatar, error, status, upload, remove } = useAvatarUpload({
-    userId: employee.id,
-    avatar: employee.avatar,
-    canUpload,
-    onAvatarChange,
-  });
   const busy = status !== "idle";
 
   return (
@@ -55,7 +57,7 @@ export function AvatarUploader({
             className="absolute right-0 top-0 size-6! rounded-full shadow-none hover:border-0 hover:bg-primary-active hover:text-on-primary disabled:opacity-60"
             size="icon"
             disabled={busy}
-            onClick={() => void remove()}
+            onClick={onRemove}
             type="button"
           >
             <X aria-hidden="true" className="size-4" />
@@ -72,7 +74,7 @@ export function AvatarUploader({
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
               event.currentTarget.value = "";
-              if (file) void upload(file);
+              if (file) void onSelect(file);
             }}
             ref={input}
             type="file"

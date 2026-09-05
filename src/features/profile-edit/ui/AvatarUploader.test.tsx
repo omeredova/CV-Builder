@@ -5,10 +5,24 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Employee } from "@/entities/employee";
 
-import { deleteAvatarMutation } from "../api/deleteAvatarMutation";
-import { uploadAvatarMutation } from "../api/uploadAvatarMutation";
+import { updateProfileWithAvatarMutation, updateProfileWithoutAvatarMutation } from "../api/updateProfileMutation";
 import { maxAvatarSize, validateAvatarFile } from "../model/avatarFile";
 import { AvatarUploader } from "./AvatarUploader";
+import { useProfileEdit, type ProfileChanges } from "../model/useProfileEdit";
+
+function ProfileEditor({ employee, canUpload, onProfileChange }: {
+  employee: Employee;
+  canUpload: boolean;
+  onProfileChange?: (changes: ProfileChanges) => void;
+}) {
+  const profile = useProfileEdit(employee, canUpload, onProfileChange);
+  return <>
+    <AvatarUploader employee={employee} canUpload={canUpload} avatar={profile.avatar}
+      error={profile.avatarError} status={profile.status}
+      onSelect={profile.selectAvatar} onRemove={profile.removeAvatar} />
+    <button disabled={!profile.canSubmit} onClick={() => void profile.submit()}>UPDATE</button>
+  </>;
+}
 
 const employee: Employee = {
   id: "42",
@@ -21,8 +35,9 @@ const employee: Employee = {
 };
 const file = new File(["image"], "avatar.png", { type: "image/png" });
 const request = {
-  query: uploadAvatarMutation,
+  query: updateProfileWithAvatarMutation,
   variables: {
+    profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" },
     avatar: {
       userId: "42",
       base64: "data:image/png;base64,aW1hZ2U=",
@@ -36,7 +51,7 @@ describe("AvatarUploader", () => {
   it("hides the file picker and trigger when upload is not permitted", () => {
     render(
       <MockedProvider>
-        <AvatarUploader employee={employee} canUpload={false} />
+        <ProfileEditor employee={employee} canUpload={false} />
       </MockedProvider>,
     );
     expect(
@@ -50,7 +65,7 @@ describe("AvatarUploader", () => {
   it("rejects unsupported formats and oversized files with a visible error", () => {
     render(
       <MockedProvider>
-        <AvatarUploader employee={employee} canUpload />
+        <ProfileEditor employee={employee} canUpload />
       </MockedProvider>,
     );
     fireEvent.change(screen.getByLabelText("Select avatar image"), {
@@ -74,8 +89,8 @@ describe("AvatarUploader", () => {
     );
   });
 
-  it("previews selection and saves the uploaded Cloudinary URL for the target user", async () => {
-    const onAvatarChange = vi.fn();
+  it("previews selection and waits for UPDATE before uploading", async () => {
+    const onProfileChange = vi.fn();
     const url = "https://res.cloudinary.com/demo/image/upload/avatar.png";
     const cache = new InMemoryCache();
     const profileFragment = gql`
@@ -99,13 +114,13 @@ describe("AvatarUploader", () => {
       <MockedProvider
         cache={cache}
         mocks={[
-          { request, delay: 100, result: { data: { uploadAvatar: url } } },
+          { request, delay: 100, result: { data: { uploadAvatar: url, updateProfile: { id: "42", first_name: "Ada", last_name: "Lovelace" } } } },
         ]}
       >
-        <AvatarUploader
+        <ProfileEditor
           employee={employee}
           canUpload
-          onAvatarChange={onAvatarChange}
+          onProfileChange={onProfileChange}
         />
       </MockedProvider>,
     );
@@ -118,10 +133,10 @@ describe("AvatarUploader", () => {
         request.variables.avatar.base64,
       ),
     );
-    expect(
-      screen.getByRole("button", { name: "Upload avatar image" }),
-    ).toBeDisabled();
-    await waitFor(() => expect(onAvatarChange).toHaveBeenCalledWith(url));
+    expect(onProfileChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
+    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: url, firstName: "Ada", lastName: "Lovelace" }));
     expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
       "src",
       expect.stringContaining("cloudinary"),
@@ -134,11 +149,11 @@ describe("AvatarUploader", () => {
     ).toMatchObject({ profile: { avatar: url } });
   });
 
-  it("restores the old avatar and allows retry after an upload failure", async () => {
+  it("retains the selected preview and allows UPDATE retry after an upload failure", async () => {
     const oldAvatar = "https://res.cloudinary.com/demo/image/upload/old.png";
     render(
       <MockedProvider mocks={[{ request, error: new Error("Upload failed") }]}>
-        <AvatarUploader
+        <ProfileEditor
           employee={{ ...employee, avatar: oldAvatar }}
           canUpload
         />
@@ -147,93 +162,89 @@ describe("AvatarUploader", () => {
     fireEvent.change(screen.getByLabelText("Select avatar image"), {
       target: { files: [file] },
     });
+    await waitFor(() => expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to upload avatar",
     );
     expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
       "src",
-      expect.stringContaining("old.png"),
+      request.variables.avatar.base64,
     );
-    expect(
-      screen.getByRole("button", { name: "Upload avatar image" }),
-    ).toBeEnabled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
   });
 
   it("removes an existing avatar and returns to the initial after saving", async () => {
-    const onAvatarChange = vi.fn();
+    const onProfileChange = vi.fn();
     render(
       <MockedProvider
         mocks={[
           {
             request: {
-              query: deleteAvatarMutation,
-              variables: { avatar: { userId: "42" } },
+              query: updateProfileWithoutAvatarMutation,
+              variables: { profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" }, avatar: { userId: "42" } },
             },
-            result: { data: { deleteAvatar: null } },
+            result: { data: { deleteAvatar: null, updateProfile: { id: "42", first_name: "Ada", last_name: "Lovelace" } } },
           },
         ]}
       >
-        <AvatarUploader
+        <ProfileEditor
           employee={{
             ...employee,
             avatar: "https://res.cloudinary.com/demo/image/upload/old.png",
           }}
           canUpload
-          onAvatarChange={onAvatarChange}
+          onProfileChange={onProfileChange}
         />
       </MockedProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
-    expect(
-      screen.getByRole("button", { name: "Upload avatar image" }),
-    ).toBeDisabled();
-    await waitFor(() => expect(onAvatarChange).toHaveBeenCalledWith(null));
+    expect(onProfileChange).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
+    await waitFor(() => expect(onProfileChange).toHaveBeenCalledWith({ avatar: null, firstName: "Ada", lastName: "Lovelace" }));
     expect(screen.getByRole("img")).toHaveTextContent("A");
     expect(
       screen.queryByRole("button", { name: "Remove image" }),
     ).not.toBeInTheDocument();
   });
 
-  it("keeps the avatar when removal fails", async () => {
-    const onAvatarChange = vi.fn();
+  it("keeps removal pending for retry when saving fails", async () => {
+    const onProfileChange = vi.fn();
     render(
       <MockedProvider
         mocks={[
           {
             request: {
-              query: deleteAvatarMutation,
-              variables: { avatar: { userId: "42" } },
+              query: updateProfileWithoutAvatarMutation,
+              variables: { profile: { userId: "42", first_name: "Ada", last_name: "Lovelace" }, avatar: { userId: "42" } },
             },
             error: new Error("Failed"),
           },
         ]}
       >
-        <AvatarUploader
+        <ProfileEditor
           employee={{
             ...employee,
             avatar: "https://res.cloudinary.com/demo/image/upload/old.png",
           }}
           canUpload
-          onAvatarChange={onAvatarChange}
+          onProfileChange={onProfileChange}
         />
       </MockedProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    fireEvent.click(screen.getByRole("button", { name: "UPDATE" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to remove avatar",
     );
-    expect(screen.getByRole("img").querySelector("img")).toHaveAttribute(
-      "src",
-      expect.stringContaining("old.png"),
-    );
-    expect(onAvatarChange).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Remove image" })).toBeEnabled();
+    expect(onProfileChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "UPDATE" })).toBeEnabled();
   });
 
   it("does not expose removal to another employee", () => {
     render(
       <MockedProvider>
-        <AvatarUploader
+        <ProfileEditor
           employee={{
             ...employee,
             avatar: "https://res.cloudinary.com/demo/image/upload/old.png",

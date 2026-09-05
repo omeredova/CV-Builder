@@ -84,6 +84,10 @@ export function UsersPage() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [selectedEmployee]);
 
+  useEffect(() => {
+    if (selectedEmployee) storeEmployee(selectedEmployee);
+  }, [selectedEmployee]);
+
   function handleSortChange(field: EmployeeSortField): void {
     setPage(1);
     if (sortBy === field) {
@@ -102,16 +106,17 @@ export function UsersPage() {
   if (activeEmployee) {
     return (
       <UserProfile
+        key={activeEmployee.id}
         employee={activeEmployee}
         initialTab={getUserProfileTab(pathname)}
-        onAvatarChange={(avatar) => {
-          const updatedEmployee = { ...activeEmployee, avatar };
-          storeEmployee(updatedEmployee);
-          if (window.location.pathname.startsWith(`/users/${encodeURIComponent(activeEmployee.id)}/`)) {
-            setSelectedEmployee(updatedEmployee);
-          }
-        }}
         onClose={() => setSelectedEmployee(null)}
+        onProfileChange={(changes) => {
+          setSelectedEmployee((current) => {
+            if (current && current.id !== activeEmployee.id) return current;
+            if (!window.location.pathname.startsWith(`/users/${encodeURIComponent(activeEmployee.id)}/`)) return current;
+            return { ...(current ?? activeEmployee), ...changes };
+          });
+        }}
       />
     );
   }

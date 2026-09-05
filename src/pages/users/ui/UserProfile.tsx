@@ -12,10 +12,12 @@ import {
   type UserCreatedAtQueryData,
   type UserCreatedAtQueryVariables,
 } from "@/entities/employee";
-import { AvatarUploader } from "@/features/avatar-upload";
+import { AvatarUploader, useProfileEdit, type ProfileChanges } from "@/features/profile-edit";
 import { formatUnixDate } from "@/shared/lib/formatters";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/shared/ui/empty";
 import { Input } from "@/shared/ui/input";
+import { FormField } from "@/shared/ui/form-field";
+import { Button } from "@/shared/ui/button";
 import { NavigationTabs } from "@/shared/ui/navigation-tabs";
 import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 
@@ -23,7 +25,7 @@ export interface UserProfileProps {
   employee: Employee;
   initialTab?: UserProfileTab;
   onClose?: () => void;
-  onAvatarChange?: (avatar: string | null) => void;
+  onProfileChange?: (changes: ProfileChanges) => void;
 }
 
 export type UserProfileTab = "languages" | "profile" | "skills";
@@ -60,9 +62,10 @@ function ProfileField({ label, select = false, value }: ProfileFieldProps) {
   );
 }
 
-export function UserProfile({ employee, initialTab = "profile", onClose, onAvatarChange }: UserProfileProps) {
+export function UserProfile({ employee, initialTab = "profile", onClose, onProfileChange }: UserProfileProps) {
   const { data: currentProfile, loading: isCheckingOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
   const canUpload = currentProfile?.me.id === employee.id;
+  const profile = useProfileEdit(employee, canUpload, onProfileChange);
   const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
   const { data, error, loading } = useQuery<
     UserCreatedAtQueryData,
@@ -71,7 +74,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onAvata
     skip: activeTab !== "profile",
     variables: { id: employee.id },
   });
-  const displayName = [employee.firstName, employee.lastName].filter(Boolean).join(" ") || employee.email;
+  const displayName = [profile.saved.firstName, profile.saved.lastName].filter(Boolean).join(" ") || employee.email;
   const memberSince =
     data?.user?.created_at !== undefined ? formatUnixDate(data.user.created_at) : null;
 
@@ -117,10 +120,14 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onAvata
           <section className="flex flex-col items-center text-center" aria-labelledby="user-profile-name">
             <AvatarUploader
               canUpload={canUpload}
-              employee={employee}
+              employee={{ ...employee, ...profile.saved }}
               isCheckingOwner={isCheckingOwner}
               key={employee.id}
-              onAvatarChange={onAvatarChange}
+              avatar={profile.avatar}
+              error={profile.avatarError}
+              status={profile.status}
+              onSelect={profile.selectAvatar}
+              onRemove={profile.removeAvatar}
             />
             <h1
               className="mt-profile-name [font-size:var(--text-profile-name)] leading-tight text-profile-name"
@@ -138,12 +145,41 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onAvata
             </p>
           </section>
 
-          <div className="mx-auto mt-profile-fields grid w-profile-fields-width max-w-full grid-cols-2 gap-x-profile-column gap-y-profile-row max-table-compact:grid-cols-1 max-table-compact:gap-y-profile-row-compact max-table-compact:justify-items-center">
-            <ProfileField label="First Name" value={employee.firstName} />
-            <ProfileField label="Last Name" value={employee.lastName} />
+          <form noValidate onSubmit={(event) => { event.preventDefault(); void profile.submit(); }} className="mx-auto mt-profile-fields grid w-profile-fields-width max-w-full grid-cols-2 gap-x-profile-column gap-y-profile-row max-table-compact:grid-cols-1 max-table-compact:gap-y-profile-row-compact max-table-compact:justify-items-center">
+            {([
+              { id: "first-name", label: "First Name", value: profile.firstName, setValue: profile.setFirstName, error: profile.firstNameError, autoComplete: "given-name" },
+              { id: "last-name", label: "Last Name", value: profile.lastName, setValue: profile.setLastName, error: profile.lastNameError, autoComplete: "family-name" },
+            ]).map((field) => (
+              <FormField
+                key={field.id}
+                id={field.id}
+                label={field.label}
+                containerClassName="w-profile-field-width max-table-compact:w-full"
+                labelPlacement="above"
+                variant={canUpload ? "active" : "default"}
+                type="text"
+                autoComplete={field.autoComplete}
+                required
+                maxLength={100}
+                disabled={!canUpload}
+                readOnly={profile.loading}
+                value={field.value}
+                onChange={(event) => field.setValue(event.target.value)}
+                error={canUpload ? field.error : undefined}
+              />
+            ))}
             <ProfileField label="Department" select value={employee.department} />
             <ProfileField label="Position" select value={employee.position} />
-          </div>
+            {canUpload && (
+              <>
+                {profile.error && <p role="alert" className="text-sm text-primary col-span-2 max-table-compact:col-span-1">{profile.error}</p>}
+                <div className="col-start-2 mt-4 flex w-full justify-end gap-6 max-table-compact:col-start-1 max-table-compact:mt-5">
+                  <Button type="button" size="default" variant="secondary">VERIFY EMAIL</Button>
+                  <Button type="submit" size="default" variant="primary" disabled={!profile.canSubmit} aria-busy={profile.loading}>UPDATE</Button>
+                </div>
+              </>
+            )}
+          </form>
         </main>
       ) : (
         <main className="grid min-h-[calc(100vh-var(--spacing-breadcrumb-header)-var(--spacing-profile-tabs-height))] place-items-center px-profile-inline">
