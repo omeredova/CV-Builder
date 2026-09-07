@@ -23,7 +23,6 @@ import { NavigationTabs } from "@/shared/ui/navigation-tabs";
 import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { UserSkills } from "@/widgets/user-skills";
 import { UserLanguages } from "@/widgets/user-languages";
-import { LanguageActions } from "@/entities/language";
 
 export interface UserProfileProps {
   employee: Employee;
@@ -200,7 +199,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
         </div>
       ) : (
         <div role="tabpanel" id="employee-panel-languages" aria-labelledby="employee-tab-languages" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <UserLanguages key={employee.id} userId={employee.id} actions={canEditOwnProfile && !isCheckingOwner ? <LanguageActions /> : undefined} />
+          <UserLanguages key={employee.id} userId={employee.id} canEdit={canEditOwnProfile && !isCheckingOwner} />
         </div>
       )}
     </>

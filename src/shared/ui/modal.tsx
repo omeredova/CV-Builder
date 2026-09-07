@@ -27,7 +27,6 @@ export function Modal({ title, description, onClose, children }: ModalProps) {
       }}
       onInteractOutside={(event) => event.preventDefault()}
       onEscapeKeyDown={(event) => {
-        // Radix handles Escape during capture; let an open combobox close first.
         if (event.target instanceof Element && event.target.closest('[role="dialog"]')?.querySelector('[role="combobox"][aria-expanded="true"]')) event.preventDefault();
       }}
     >

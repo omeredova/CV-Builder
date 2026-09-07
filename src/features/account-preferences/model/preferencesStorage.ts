@@ -20,7 +20,6 @@ export function readPreferences(userId?: string): string | null {
 }
 
 export function savePreference(userId: string, field: keyof Preferences, value: string): void {
-  // Read at write time so other tabs' changes are preserved.
   const current = parsePreferences(localStorage.getItem(preferencesKey(userId)));
   const next = normalizePreferences({ ...current, [field]: value });
   localStorage.setItem(preferencesKey(userId), JSON.stringify(next));

@@ -7,7 +7,7 @@ import type { AvailableSkillsPage, SkillManagementOperations } from "./types";
 export interface SkillFormOptions {
   skill?: AssignedSkill;
   assignedSkills: readonly AssignedSkill[];
-  operations: SkillManagementOperations;
+  operations: Pick<SkillManagementOperations, "loadSkills" | "addSkill" | "updateSkill">;
   onSaved: () => void;
 }
 

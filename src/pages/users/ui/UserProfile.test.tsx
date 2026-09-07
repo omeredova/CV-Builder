@@ -232,7 +232,7 @@ describe("UserProfile", () => {
     ]}><UserProfile employee={employee} initialTab="languages" /></MockedProvider>);
     expect(screen.getByRole("tab", { name: "Languages" })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByRole("button", { name: "ADD LANGUAGE" })).not.toBeInTheDocument();
-    await screen.findByText("No languages here");
+    await screen.findByText("No languages added yet");
     if (viewerId === employee.id) {
       expect(await screen.findByRole("button", { name: "ADD LANGUAGE" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "REMOVE LANGUAGES" })).toHaveClass("text-primary");
@@ -247,7 +247,7 @@ describe("UserProfile", () => {
       emptyLanguagesMock,
       { request: { query: currentProfileQuery }, error: new Error("Offline") },
     ]}><UserProfile employee={employee} initialTab="languages" /></MockedProvider>);
-    await screen.findByText("No languages here");
+    await screen.findByText("No languages added yet");
     await screen.findByText("Unable to check profile editing access.");
     expect(screen.queryByRole("button", { name: "ADD LANGUAGE" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "REMOVE LANGUAGES" })).not.toBeInTheDocument();
@@ -290,7 +290,7 @@ describe("UserProfile", () => {
 
     await user.click(screen.getByRole("tab", { name: "Languages" }));
     expect(window.location.pathname).toBe("/users/user-1/languages");
-    expect(await screen.findByRole("heading", { name: "No languages here" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No languages added yet" })).toBeInTheDocument();
   });
 
   it("opens the tab supplied from a refreshed URL", async () => {
