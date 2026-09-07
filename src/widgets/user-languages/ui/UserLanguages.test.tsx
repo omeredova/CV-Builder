@@ -35,7 +35,7 @@ describe("UserLanguages", () => {
       <UserLanguages userId="employee-2" actions={<button type="button">Custom action</button>} />
     </MockedProvider>);
     expect(screen.queryByRole("button", { name: "Custom action" })).not.toBeInTheDocument();
-    expect(await screen.findByText("No languages here")).toBeInTheDocument();
+    expect(await screen.findByText("No languages added yet")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Custom action" })).toBeInTheDocument();
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Current languages" })).not.toBeInTheDocument();
@@ -62,6 +62,6 @@ describe("UserLanguages", () => {
     await screen.findByText("Russian");
     rerender(<MockedProvider><UserLanguages userId="employee-3" /></MockedProvider>);
     expect(screen.queryByText("Russian")).not.toBeInTheDocument();
-    expect(await screen.findByText("No languages here")).toBeInTheDocument();
+    expect(await screen.findByText("No languages added yet")).toBeInTheDocument();
   });
 });

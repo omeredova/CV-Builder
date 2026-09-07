@@ -2,3 +2,4 @@ export { profileLanguagesQuery, type ProfileLanguagesQueryData, type ProfileLang
 export type { AssignedLanguage, LanguageProficiency } from "./model/types";
 export { LanguageList, type LanguageListProps } from "./ui/LanguageList";
 export { LanguageActions, type LanguageActionsProps } from "./ui/LanguageActions";
+export { languageProficiencyOptions } from "./model/proficiency";

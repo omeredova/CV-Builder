@@ -2,7 +2,6 @@ import type { SkillMastery, SkillMasteryDisplay } from "./types";
 
 export const MAX_SKILL_MASTERY_LEVEL = 5;
 
-// API enum names differ from the product's five ordered mastery labels.
 export const skillMasteryLabels: Readonly<Record<SkillMastery, string>> = {
   Novice: "Beginner",
   Advanced: "Elementary",
