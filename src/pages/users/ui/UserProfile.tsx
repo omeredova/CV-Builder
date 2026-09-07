@@ -24,7 +24,6 @@ import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { UserSkills } from "@/widgets/user-skills";
 import { UserLanguages } from "@/widgets/user-languages";
 import { LanguageActions } from "@/entities/language";
-import { SkillActions } from "@/entities/skill";
 
 export interface UserProfileProps {
   employee: Employee;
@@ -197,7 +196,7 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
         </div>
       ) : activeTab === "skills" ? (
         <div role="tabpanel" id="employee-panel-skills" aria-labelledby="employee-tab-skills" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <UserSkills key={employee.id} userId={employee.id} actions={canEditOwnProfile && !isCheckingOwner ? <SkillActions /> : undefined} />
+          <UserSkills key={employee.id} userId={employee.id} canEdit={canEditOwnProfile && !isCheckingOwner} />
         </div>
       ) : (
         <div role="tabpanel" id="employee-panel-languages" aria-labelledby="employee-tab-languages" tabIndex={0} className="mx-auto w-full max-w-profile-content px-profile-inline py-8 outline-none focus-visible:ring-2 focus-visible:ring-primary">
