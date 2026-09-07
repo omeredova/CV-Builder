@@ -54,6 +54,7 @@ export function AppSidebar() {
   const profileName = [account?.first_name, account?.last_name].filter(Boolean).join(" ") || account?.email || "Your account";
   const pathname = usePathname() ?? "/";
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
   return (
     <Sidebar className="group/sidebar data-[collapsed=true]:w-sidebar-collapsed max-dashboard:w-sidebar-collapsed" data-collapsed={isCollapsed}>
@@ -117,8 +118,14 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <DropdownMenu open={isAccountMenuOpen} onOpenChange={setIsAccountMenuOpen}>
+          <DropdownMenuTrigger
+            asChild
+            onPointerDown={(event) => {
+              event.preventDefault();
+            }}
+            onClick={() => setIsAccountMenuOpen((open) => !open)}
+          >
             <button
               className="flex h-sidebar-footer w-full items-center gap-sidebar-profile overflow-hidden whitespace-nowrap text-sidebar-foreground outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
               type="button"

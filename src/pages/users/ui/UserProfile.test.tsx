@@ -43,7 +43,7 @@ describe("UserProfile", () => {
     const departmentResult = vi.fn(() => ({ data: { options: { items: [{ id: "d1", name: "React" }], total_pages: 1 } } }));
     render(<MockedProvider mocks={[
       { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
       { request: { query: departmentsQuery, variables: { page: 1 } }, result: departmentResult },
       { request: { query: positionsQuery, variables: { page: 1 } }, result: { data: { options: { items: [{ id: "p1", name: "Engineer" }], total_pages: 1 } } } },
       { request: { query: createUpdateProfileMutation(true), variables: { profile: { userId: employee.id, first_name: employee.firstName, last_name: employee.lastName }, user: { userId: employee.id, departmentId: "d1", positionId: "p1" } } }, result: { data: { updateProfile: { id: employee.id, first_name: employee.firstName, last_name: employee.lastName }, updateUser: { id: employee.id, department: { id: "d1", name: "React" }, position: { id: "p1", name: "Engineer" } } } } },
@@ -68,7 +68,7 @@ describe("UserProfile", () => {
     const user = userEvent.setup();
     render(<MockedProvider mocks={[
       { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
     ]}><UserProfile employee={{ ...employee, departmentId: null, department: null, positionId: null, position: null }} /></MockedProvider>);
     const update = await screen.findByRole("button", { name: "UPDATE" });
     await user.type(screen.getByRole("textbox", { name: "First Name" }), "a");
@@ -88,7 +88,7 @@ describe("UserProfile", () => {
       { request: ownerRequest, error: new Error("Offline") },
       { request: ownerRequest, result: { data: { me: { id: employee.id } } } },
       { request: dateRequest, error: new Error("Offline") },
-      { request: dateRequest, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: dateRequest, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
     ]}><UserProfile employee={employee} /></MockedProvider>);
     await user.click(await screen.findByRole("button", { name: "Retry access check" }));
     await screen.findByRole("button", { name: "UPDATE" });
@@ -102,7 +102,7 @@ describe("UserProfile", () => {
   it("shows a membership-date skeleton until the date arrives", async () => {
     render(<MockedProvider mocks={[
       { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: 80, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: 80, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
     ]}><UserProfile employee={employee} /></MockedProvider>);
     expect(screen.getByRole("status", { name: "Loading membership date" })).toHaveAttribute("data-slot", "skeleton");
     expect(await screen.findByText("A member since Sun Jan 14 2024")).toBeInTheDocument();
@@ -116,7 +116,7 @@ describe("UserProfile", () => {
     render(
       <MockedProvider mocks={[
         { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
         { request: { query: sendVerificationMutation, variables: { email: employee.email } }, delay: 100, result },
       ]}>
         <UserProfile employee={employee} />
@@ -139,7 +139,7 @@ describe("UserProfile", () => {
     render(
       <MockedProvider mocks={[
         { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
         { request, ...(failure === "network" ? { error: new Error("Offline") } : { result: { errors: [{ message: "Failed" }] } }) },
         { request, result: { data: { sendVerification: null } } },
       ]}>
@@ -163,7 +163,7 @@ describe("UserProfile", () => {
     const mocks = [
       emptySkillsMock,
       { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
     ];
     const { rerender } = render(
       <MockedProvider mocks={mocks}>
@@ -192,7 +192,7 @@ describe("UserProfile", () => {
         mocks={[
           {
             request: { query: userCreatedAtQuery, variables: { id: employee.id } },
-            result: { data: { user: { created_at: 1_705_233_600 } } },
+            result: { data: { user: { __typename: "User", id: employee.id, created_at: 1_705_233_600 } } },
           },
         ]}
       >
@@ -259,7 +259,7 @@ describe("UserProfile", () => {
     render(<MockedProvider mocks={[
       { ...emptySkillsMock, result },
       { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } },
-      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+      { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
     ]}><UserProfile employee={employee} /></MockedProvider>);
     await screen.findByText("A member since Sun Jan 14 2024");
     expect(result).not.toHaveBeenCalled();
@@ -279,7 +279,7 @@ describe("UserProfile", () => {
     const user = userEvent.setup();
 
     render(
-      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
+      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} />
       </MockedProvider>,
     );
@@ -295,7 +295,7 @@ describe("UserProfile", () => {
 
   it("opens the tab supplied from a refreshed URL", async () => {
     render(
-      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } }]}>
+      <MockedProvider mocks={[emptyLanguagesMock, emptySkillsMock, { request: { query: currentProfileQuery }, result: { data: { me: { id: "other-user" } } } }, { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } }]}>
         <UserProfile employee={employee} initialTab="skills" />
       </MockedProvider>,
     );
@@ -315,7 +315,7 @@ describe("UserProfile", () => {
     render(
       <MockedProvider mocks={[
         { request: { query: currentProfileQuery }, delay: ownershipDelay, result: { data: { me: { id } } } },
-        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: dateDelay, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, delay: dateDelay, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
       ]}>
         <UserProfile employee={employee} />
       </MockedProvider>,
@@ -348,7 +348,7 @@ describe("UserProfile", () => {
     render(
       <MockedProvider cache={cache} mocks={[
         { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
         { request: { query: updateProfileMutation, variables: { profile: { userId: employee.id, first_name: "Ada", last_name: "Lovelace" } } }, delay: 50, result: { data: { updateProfile: { __typename: "Profile", id: employee.id, first_name: "Ada", last_name: "Lovelace" } } } },
       ]}>
         <UserProfile employee={employee} onProfileChange={onProfileChange} />
@@ -389,7 +389,7 @@ describe("UserProfile", () => {
     render(
       <MockedProvider mocks={[
         { request: { query: currentProfileQuery }, result: { data: { me: { id: employee.id } } } },
-        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { created_at: "1705233600" } } } },
+        { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
         { request: { query: updateProfileMutation, variables: { profile: { userId: employee.id, first_name: "Ada", last_name: employee.lastName } } }, error: new Error("Failed") },
       ]}>
         <UserProfile employee={employee} />
