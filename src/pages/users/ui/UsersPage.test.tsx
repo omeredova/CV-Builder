@@ -84,7 +84,7 @@ describe("UsersPage", () => {
           },
           {
             request: { query: userCreatedAtQuery, variables: { id: "employee-1" } },
-            result: { data: { user: { created_at: 1_705_233_600 } } },
+            result: { data: { user: { __typename: "User", id: "employee-1", created_at: 1_705_233_600 } } },
           },
         ]}
       >
