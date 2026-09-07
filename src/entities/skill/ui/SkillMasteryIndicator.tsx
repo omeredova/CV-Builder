@@ -4,9 +4,10 @@ import { cn } from "@/shared/lib/class-names";
 import { Progress } from "@/shared/ui/progress";
 
 import { getSkillMasteryDescription, MAX_SKILL_MASTERY_LEVEL, skillMasteryLevels } from "../model/mastery";
-import type { SkillMastery } from "../model/types";
+import type { SkillMasteryDisplay } from "../model/types";
 
-const masteryStyles: Record<SkillMastery, string> = {
+const masteryStyles: Record<SkillMasteryDisplay, string> = {
+  None: "bg-skill-zero",
   Novice: "text-skill-novice bg-skill-novice-track",
   Advanced: "text-skill-advanced bg-skill-advanced-track",
   Competent: "text-skill-competent bg-skill-competent-track",
@@ -16,7 +17,7 @@ const masteryStyles: Record<SkillMastery, string> = {
 
 export interface SkillMasteryIndicatorProps {
   skillName: string;
-  mastery: SkillMastery;
+  mastery: SkillMasteryDisplay;
   className?: string;
 }
 

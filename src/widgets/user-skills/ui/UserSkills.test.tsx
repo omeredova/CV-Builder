@@ -41,7 +41,7 @@ describe("UserSkills", () => {
     await screen.findByText("React");
     expect(screen.getAllByRole("heading").map((heading) => heading.textContent)).toEqual(["Programming Languages", "Frontend", "Backend", "Other skills"]);
     expect(within(screen.getByRole("region", { name: "Frontend" })).getAllByRole("listitem")).toHaveLength(2);
-    for (const [name, level, mastery] of [["Storybook", 1, "Novice"], ["SQL", 2, "Advanced"], ["Node.js", 3, "Competent"], ["TypeScript", 4, "Proficient"], ["React", 5, "Expert"]]) {
+    for (const [name, level, mastery] of [["Storybook", 1, "Beginner"], ["SQL", 2, "Elementary"], ["Node.js", 3, "Intermediate"], ["TypeScript", 4, "Advanced"], ["React", 5, "Expert"]]) {
       const progress = screen.getByRole("progressbar", { name: `${name} mastery` });
       expect(progress).toHaveAttribute("aria-valuenow", String(level));
       expect(progress).toHaveAttribute("aria-valuetext", `${mastery}, level ${level} of 5`);
@@ -66,7 +66,7 @@ describe("UserSkills", () => {
 
   it("shows an empty state even when categories exist", async () => {
     render(<MockedProvider mocks={[{ request, result: { data: { ...data, profile: { id: "employee-2", skills: [] } } } }]}><UserSkills userId="employee-2" /></MockedProvider>);
-    expect(await screen.findByRole("heading", { name: "No skills here" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No skills added yet" })).toBeInTheDocument();
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
@@ -78,6 +78,6 @@ describe("UserSkills", () => {
     await screen.findByText("React");
     rerender(<MockedProvider><UserSkills userId="employee-3" /></MockedProvider>);
     expect(screen.queryByText("React")).not.toBeInTheDocument();
-    expect(await screen.findByText("No skills here")).toBeInTheDocument();
+    expect(await screen.findByText("No skills added yet")).toBeInTheDocument();
   });
 });

@@ -2,4 +2,5 @@ export { profileSkillsQuery, type ProfileSkillsQueryData, type ProfileSkillsQuer
 export { SkillGroups, type SkillGroupsProps } from "./ui/SkillGroups";
 export { SkillActions, type SkillActionsProps } from "./ui/SkillActions";
 export { SkillMasteryIndicator, type SkillMasteryIndicatorProps } from "./ui/SkillMasteryIndicator";
-export type { AssignedSkill, SkillCategory, SkillMastery } from "./model/types";
+export type { AssignedSkill, SkillCategory, SkillMastery, SkillMasteryDisplay } from "./model/types";
+export { skillMasteryOptions } from "./model/mastery";

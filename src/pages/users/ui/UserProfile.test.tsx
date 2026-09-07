@@ -215,7 +215,7 @@ describe("UserProfile", () => {
       { request: { query: currentProfileQuery }, result: { data: { me: { id: viewerId } } } },
     ]}><UserProfile employee={employee} initialTab="skills" /></MockedProvider>);
     expect(screen.queryByRole("button", { name: "ADD SKILL" })).not.toBeInTheDocument();
-    await screen.findByText("No skills here");
+    await screen.findByText("No skills added yet");
     if (viewerId === employee.id) {
       expect(await screen.findByRole("button", { name: "ADD SKILL" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "REMOVE SKILLS" })).toHaveClass("text-primary");
@@ -267,11 +267,11 @@ describe("UserProfile", () => {
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: "Skills" })).toHaveFocus();
     expect(screen.getByRole("tab", { name: "Skills" })).toHaveAttribute("aria-selected", "true");
-    expect(await screen.findByText("No skills here")).toBeInTheDocument();
+    expect(await screen.findByText("No skills added yet")).toBeInTheDocument();
     expect(result).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("tab", { name: "Profile" }));
     await user.click(screen.getByRole("tab", { name: "Skills" }));
-    expect(await screen.findByText("No skills here")).toBeInTheDocument();
+    expect(await screen.findByText("No skills added yet")).toBeInTheDocument();
     expect(result).toHaveBeenCalledTimes(1);
   });
 
@@ -286,7 +286,7 @@ describe("UserProfile", () => {
 
     await user.click(screen.getByRole("tab", { name: "Skills" }));
     expect(window.location.pathname).toBe("/users/user-1/skills");
-    expect(await screen.findByRole("heading", { name: "No skills here" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No skills added yet" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: "Languages" }));
     expect(window.location.pathname).toBe("/users/user-1/languages");
@@ -304,7 +304,7 @@ describe("UserProfile", () => {
       "aria-selected",
       "true",
     );
-    expect(await screen.findByRole("heading", { name: "No skills here" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "No skills added yet" })).toBeInTheDocument();
   });
   it.each([
     ["user-1", true, 60, 0],

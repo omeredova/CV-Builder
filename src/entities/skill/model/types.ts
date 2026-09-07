@@ -1,5 +1,8 @@
 export type SkillMastery = "Novice" | "Advanced" | "Competent" | "Proficient" | "Expert";
 
+/** Includes the visual-only level used for a skill selected for removal. */
+export type SkillMasteryDisplay = SkillMastery | "None";
+
 export interface AssignedSkill {
   name: string;
   categoryId: string | null;

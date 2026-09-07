@@ -7,6 +7,36 @@ import { Select } from "./select";
 const options = [{ value: "1", label: "React" }, { value: "2", label: "Design" }];
 
 describe("Select", () => {
+  it("keeps the load-more control keyboard accessible and returns focus on Escape", async () => {
+    const user = userEvent.setup();
+    render(<Select label="Skill" value="" options={[]} hasMore onLoadMore={vi.fn()} onValueChange={vi.fn()} />);
+    const control = screen.getByRole("combobox");
+    await user.click(control);
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Load more options" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(control).toHaveFocus();
+  });
+
+  it("loads more with the keyboard and keeps existing options selectable during loading", async () => {
+    const user = userEvent.setup();
+    const onLoadMore = vi.fn();
+    const onValueChange = vi.fn();
+    const { rerender } = render(<Select label="Skill" value="" options={options} hasMore onLoadMore={onLoadMore} onValueChange={onValueChange} />);
+    await user.click(screen.getByRole("combobox"));
+    expect(onLoadMore).not.toHaveBeenCalled();
+    await user.keyboard("{ArrowDown}{ArrowDown}");
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    rerender(<Select label="Skill" value="" options={options} hasMore loading onLoadMore={onLoadMore} onValueChange={onValueChange} />);
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+    expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "true");
+    await user.keyboard("{ArrowDown}");
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    await user.keyboard("{Enter}");
+    expect(onValueChange).toHaveBeenCalledWith("2");
+  });
+
   it("supports keyboard navigation, selection, Escape, and focus retention", async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
