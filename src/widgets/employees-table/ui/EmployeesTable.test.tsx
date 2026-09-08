@@ -76,6 +76,16 @@ describe("EmployeesTable", () => {
     );
   });
 
+  it("allows reducing the page size when there is only one page", async () => {
+    const user = userEvent.setup();
+    const onPageSizeChange = vi.fn();
+    render(<EmployeesTable employees={[employee]} pageSize={50} totalPages={1}
+      onPageChange={vi.fn()} onPageSizeChange={onPageSizeChange} />);
+    await user.click(screen.getByRole("button", { name: "Rows per page: 50" }));
+    await user.click(screen.getByRole("menuitem", { name: "10" }));
+    expect(onPageSizeChange).toHaveBeenCalledWith(10);
+  });
+
   it("shows a retry action when loading fails", async () => {
     const user = userEvent.setup();
     const onRetry = vi.fn();

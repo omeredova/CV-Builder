@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { UserRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useHistoryTabs } from "@/shared/lib/use-history-tabs";
 
 import {
   currentProfileQuery,
@@ -24,32 +24,22 @@ import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { UserSkills } from "@/widgets/user-skills";
 import { UserLanguages } from "@/widgets/user-languages";
 
+import { getUserProfileTab, profileTabs, type UserProfileTab } from "../model/userProfileTabs";
+
 export interface UserProfileProps {
   employee: Employee;
   initialTab?: UserProfileTab;
-  onClose?: () => void;
   onProfileChange?: (changes: ProfileChanges) => void;
 }
 
-export type UserProfileTab = "languages" | "profile" | "skills";
-
-const profileTabs: readonly { label: string; value: UserProfileTab }[] = [
-  { label: "Profile", value: "profile" },
-  { label: "Skills", value: "skills" },
-  { label: "Languages", value: "languages" },
-];
-
-export function getUserProfileTab(pathname: string): UserProfileTab {
-  const tab = pathname.split("/").at(-1);
-  return tab === "skills" || tab === "languages" ? tab : "profile";
-}
-
-export function UserProfile({ employee, initialTab = "profile", onClose, onProfileChange }: UserProfileProps) {
+export function UserProfile({ employee, initialTab = "profile", onProfileChange }: UserProfileProps) {
   const { data: currentProfile, loading: isCheckingOwner, error: ownerError, refetch: retryOwner } = useQuery<CurrentProfileQueryData>(currentProfileQuery);
   const canEditOwnProfile = !ownerError && currentProfile?.me.id === employee.id;
   const profile = useProfileEdit(employee, canEditOwnProfile, onProfileChange);
   const verification = useSendVerification();
-  const [activeTab, setActiveTab] = useState<UserProfileTab>(initialTab);
+  const { activeTab, openTab } = useHistoryTabs({
+    initialTab, basePath: `/users/${encodeURIComponent(employee.id)}`, getTab: getUserProfileTab,
+  });
   const { data, error, loading, refetch: retryDate } = useQuery<
     UserCreatedAtQueryData,
     UserCreatedAtQueryVariables
@@ -62,24 +52,9 @@ export function UserProfile({ employee, initialTab = "profile", onClose, onProfi
   const memberSince =
     data?.user?.created_at !== undefined ? formatUnixDate(data.user.created_at) : null;
 
-  useEffect(() => {
-    function handlePopState(): void {
-      setActiveTab(getUserProfileTab(window.location.pathname));
-    }
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  function openTab(tab: UserProfileTab): void {
-    window.history.pushState(null, "", `/users/${encodeURIComponent(employee.id)}/${tab}`);
-    setActiveTab(tab);
-  }
-
   return (
     <>
       <AppBreadcrumb
-        onPageClick={onClose}
         pageHref="/users"
         pageName="Employees"
         trail={[

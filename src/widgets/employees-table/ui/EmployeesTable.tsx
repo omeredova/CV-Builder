@@ -1,8 +1,9 @@
-import { ArrowDown, ArrowUp, Search } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 import type { Employee, EmployeeSortField, SortOrder } from "@/entities/employee";
 import { Button } from "@/shared/ui/button";
-import { Input, type InputProps } from "@/shared/ui/input";
+import type { InputProps } from "@/shared/ui/input";
+import { CollectionSearch } from "@/shared/ui/collection-search";
 import { primaryFocusRingClassName } from "@/shared/ui/styles";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import {
@@ -51,19 +52,11 @@ export function EmployeesTable({
       aria-label="Employees table"
       className="mx-auto mt-table-offset w-full max-w-table-container-width px-table-page-inline max-table-compact:[&_[data-column=email]]:hidden max-table-compact:[&_[data-column=position]]:hidden dashboard:max-w-none"
     >
-      <div className="relative mb-table-search-gap ml-table-search-margin h-table-search w-table-search-width min-w-table-search-min-width max-w-[calc(100%-var(--spacing-table-search-max-offset))]">
-        <Search
-          aria-hidden="true"
-          className="pointer-events-none absolute left-table-search-icon top-1/2 size-table-search-icon-size -translate-y-1/2 text-table-search-icon"
-        />
-        <Input
-          {...searchProps}
-          aria-label="Search employees"
-          className="h-full rounded-control border-border py-0 pr-table-search-inline pl-table-search-text text-base text-foreground placeholder:text-table-search-placeholder"
-          placeholder="Search"
-          type="search"
-        />
-      </div>
+      <CollectionSearch
+        {...searchProps}
+        aria-label="Search employees"
+        containerClassName="mb-table-search-gap ml-table-search-margin max-w-[calc(100%-var(--spacing-table-search-max-offset))]"
+      />
 
       <div className="w-full">
         <Table className="table-fixed" containerClassName="overflow-x-hidden">
@@ -138,7 +131,7 @@ export function EmployeesTable({
         </Table>
       </div>
 
-      {totalPages > 1 && onPageChange && onPageSizeChange && (
+      {onPageChange && onPageSizeChange && (
         <EmployeesPagination
           disabled={isLoading}
           onPageChange={onPageChange}

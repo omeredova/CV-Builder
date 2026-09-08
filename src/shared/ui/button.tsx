@@ -22,6 +22,11 @@ export const buttonVariants = cva(
             "w-button-width rounded-control bg-primary text-on-primary shadow-primary hover:border hover:border-primary hover:bg-transparent hover:text-primary active:border active:border-primary active:bg-primary-active active:text-primary",
             standardButtonTypographyClassName,
           ),
+        primaryV2:
+          cn(
+            "w-button-width rounded-control border border-transparent bg-transparent text-primary hover:border-primary active:border-primary active:bg-primary-active",
+            standardButtonTypographyClassName,
+          ),
         secondary:
           cn(
             "w-button-width rounded-control border border-muted-foreground text-muted-foreground hover:bg-disabled hover:text-on-primary active:bg-muted-foreground active:text-on-primary active:shadow-control-active",
@@ -32,6 +37,7 @@ export const buttonVariants = cva(
             "w-ghost-button-width rounded-control text-muted-foreground hover:border hover:border-muted-foreground active:border active:border-muted-foreground active:bg-disabled",
             standardButtonTypographyClassName,
           ),
+        icon: "rounded-full border border-transparent bg-transparent text-muted-foreground hover:border-muted-foreground active:border-muted-foreground active:bg-disabled active:text-on-primary data-[state=open]:border-muted-foreground data-[state=open]:bg-disabled data-[state=open]:text-on-primary disabled:bg-transparent disabled:text-disabled",
         outline:
           cn(
             "rounded-control border border-border bg-transparent text-foreground hover:bg-sidebar-accent",
@@ -46,6 +52,7 @@ export const buttonVariants = cva(
         content: "h-auto p-0",
         default: "h-control-height",
         icon: "size-control-height p-0",
+        actionIcon: "size-action-icon shrink-0 p-0",
         pagination:
           "size-compact-control shrink-0 p-0 [&>svg]:h-chevron-height [&>svg]:w-chevron-width",
       },

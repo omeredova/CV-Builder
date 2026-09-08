@@ -90,6 +90,12 @@
 }
 
 @theme inline {
+  --spacing-action-icon: 2.5rem;
+  --spacing-action-menu-width: 5.625rem;
+  --spacing-cv-column-name: 34%;
+  --spacing-cv-column-education: 29%;
+  --spacing-cv-column-actions: 3.5rem;
+  --spacing-cv-description: 11rem;
   /* Responsive layout */
   --breakpoint-dashboard: 90rem;
   --breakpoint-table-compact: 80.875rem;
