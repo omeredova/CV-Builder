@@ -6,13 +6,14 @@ import { useSkillForm, type SkillFormOptions } from "../model/useSkillForm";
 
 export interface SkillFormDialogProps extends SkillFormOptions {
   onClose: () => void;
+  disableUntilValid?: boolean;
 }
 
-export function SkillFormDialog({ onClose, ...props }: SkillFormDialogProps) {
+export function SkillFormDialog({ onClose, disableUntilValid = false, ...props }: SkillFormDialogProps) {
   const form = useSkillForm(props);
   return <ManagementFormDialog title={props.skill ? "Update skill" : "Add skill"} onClose={onClose}
     submitLabel={props.skill ? "SAVE" : "ADD"} saving={form.saving} error={form.error}
-    submitDisabled={form.loadingOptions} onSubmit={form.submit}>
+    submitDisabled={form.loadingOptions || (disableUntilValid && !form.valid)} onSubmit={form.submit}>
     <Select label="Skill" labelPlacement="floating" required value={form.name} options={form.options} onValueChange={form.setName}
       onOpen={() => { void form.loadOptions(); }} disabled={Boolean(props.skill) || form.saving}
       loading={form.loadingOptions} error={form.skillError} loadError={form.optionsError}

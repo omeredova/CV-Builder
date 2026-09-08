@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Button } from "./button";
-import { DialogFooter } from "./dialog";
-import { Modal } from "./modal";
+import { ConfirmationDialog } from "./confirmation-dialog";
 
 export interface ManagementRemoval {
   active: boolean;
@@ -41,13 +40,9 @@ export function Management({ empty, emptyMessage, actions, form, removal, childr
     </div> : actions}
     {removal.active && !removal.confirming && removal.error && <p role="alert" className="mt-4 text-sm text-primary">{removal.error}</p>}
     {form}
-    {removal.active && removal.confirming && <Modal title={removal.title} description={removal.description} onClose={removal.onCloseConfirmation}>
-      {removal.error && <p role="alert" className="text-sm text-primary">{removal.error}</p>}
-      <DialogFooter>
-        <Button type="button" variant="secondary" onClick={removal.onCloseConfirmation}>CANCEL</Button>
-        <Button type="button" disabled={removal.pending || !removal.count} aria-busy={removal.pending}
-          onClick={() => { void removal.onConfirm(); }}>{removal.pending ? "REMOVING…" : "CONFIRM"}</Button>
-      </DialogFooter>
-    </Modal>}
+    {removal.active && removal.confirming && <ConfirmationDialog
+      title={removal.title} description={removal.description} onClose={removal.onCloseConfirmation}
+      pending={removal.pending} pendingLabel="REMOVING…" confirmDisabled={!removal.count}
+      error={removal.error} onConfirm={removal.onConfirm} />}
   </>;
 }

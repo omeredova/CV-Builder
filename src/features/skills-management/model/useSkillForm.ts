@@ -66,6 +66,7 @@ export function useSkillForm({ skill, assignedSkills, operations, onSaved }: Ski
 
   return {
     name, mastery, saving, error, loadingOptions, optionsError,
+    valid: Boolean(selected && mastery),
     hasMoreOptions: !skill && catalog?.nextPage !== null,
     options: skill ? [{ value: skill.name, label: skill.name }] : available.map((item) => ({ value: item.name, label: item.name })),
     skillError: submitted && !selected ? "Skill is required" : undefined,
