@@ -92,7 +92,7 @@ export function UsersPage() {
         renderActions={(employee) => (
           <Link
             aria-label={`Open ${[employee.firstName, employee.lastName].filter(Boolean).join(" ") || employee.email} profile`}
-            className="mx-auto flex size-9 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="mx-auto flex size-9 items-center justify-center rounded-full border border-transparent outline-none transition-colors hover:border-muted-foreground focus-visible:ring-2 focus-visible:ring-primary"
             href={`/users/${encodeURIComponent(employee.id)}/profile`}
           >
             <ChevronRightIcon className="h-chevron-height w-chevron-width text-employee-chevron" />
