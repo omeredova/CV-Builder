@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cvQuery, cvSkillsQuery, cvProjectsQuery, cvHeaderQuery, updateCvMutation } from "@/entities/cv";
 import { skillCategoriesQuery } from "@/entities/skill";
 import { currentAccountQuery } from "@/entities/employee";
+import { cvPreviewQuery } from "@/features/cv-preview/api/previewOperations";
 import { cvTabs } from "../model/cvTabs";
 import { CvDetailsPage } from "./CvDetailsPage";
 
@@ -97,7 +98,7 @@ describe("CV details", () => {
 
   it("changes the URL, panel, underline and breadcrumb with keyboard navigation and browser history", async () => {
     const user = userEvent.setup();
-    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), categories]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
+    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), { request: { query: cvPreviewQuery, variables: { cvId: "cv1" } }, delay: Infinity }, categories]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
     await screen.findByRole("textbox", { name: "Name" });
     const detailsTab = screen.getByRole("tab", { name: "Details" });
     detailsTab.focus();
@@ -116,12 +117,12 @@ describe("CV details", () => {
 
   it.each(cvTabs)("restores $label from the route on a fresh page load", async ({ value, label }) => {
     window.history.replaceState(null, "", `/cvs/cv1/${value}`);
-    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), categories]}><CvDetailsPage cvId="cv1" initialTab={value} /></MockedProvider>);
+    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), { request: { query: cvPreviewQuery, variables: { cvId: "cv1" } }, delay: Infinity }, categories]}><CvDetailsPage cvId="cv1" initialTab={value} /></MockedProvider>);
     await screen.findByText("Engineer", { selector: "nav span" });
     expect(screen.getByRole("tab", { name: label })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tabpanel", { name: label })).toBeInTheDocument();
     if (value === "projects") expect(screen.getByRole("searchbox", { name: "Search CV projects" })).toBeInTheDocument();
-    if (value === "preview") expect(screen.getByRole("tabpanel", { name: label })).toBeEmptyDOMElement();
+    if (value === "preview") expect(screen.getByRole("button", { name: "Export PDF" })).toBeDisabled();
   });
 
   it("loads projects for the selected CV instead of projects cached for another CV", async () => {
