@@ -7,8 +7,8 @@ export const authorizationLink = new SetContextLink((previousContext) => {
 
   return {
     headers: {
-      ...previousContext.headers,
       ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+      ...previousContext.headers,
     },
   };
 });
