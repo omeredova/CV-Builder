@@ -12,12 +12,13 @@ export interface ConfirmationDialogProps {
   pending: boolean;
   confirmDisabled?: boolean;
   error?: string;
+  returnFocusId?: string;
   onClose: () => void;
   onConfirm: () => void | Promise<void>;
 }
 
-export function ConfirmationDialog({ title, description, confirmLabel = "CONFIRM", pendingLabel, pending, confirmDisabled = false, error, onClose, onConfirm }: ConfirmationDialogProps) {
-  return <Modal title={title} description={description} onClose={() => { if (!pending) onClose(); }}>
+export function ConfirmationDialog({ title, description, confirmLabel = "CONFIRM", pendingLabel, pending, confirmDisabled = false, error, returnFocusId, onClose, onConfirm }: ConfirmationDialogProps) {
+  return <Modal title={title} description={description} returnFocusId={returnFocusId} onClose={() => { if (!pending) onClose(); }}>
     {error && <p role="alert" className="text-sm text-primary">{error}</p>}
     <DialogFooter>
       <Button type="button" variant="secondary" disabled={pending} onClick={onClose}>CANCEL</Button>

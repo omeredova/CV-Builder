@@ -22,6 +22,7 @@
   /* Surfaces and content */
   --background: var(--neutral-50);
   --card: var(--neutral-50);
+  --badge-background: var(--neutral-200);
   --dialog: var(--neutral-50);
   --card-foreground: var(--neutral-950);
   --foreground: var(--neutral-950);
@@ -322,6 +323,7 @@
     --background: var(--neutral-950);
     --card: var(--neutral-950);
     --dialog: var(--dark-surface-accent);
+    --badge-background: var(--dark-surface-accent);
     --card-foreground: var(--neutral-50);
     --foreground: var(--neutral-50);
     --muted-foreground: var(--neutral-300);
@@ -370,6 +372,7 @@
     --background: var(--neutral-950);
     --card: var(--neutral-950);
     --dialog: var(--dark-surface-accent);
+    --badge-background: var(--dark-surface-accent);
     --card-foreground: var(--neutral-50);
     --foreground: var(--neutral-50);
     --muted-foreground: var(--neutral-300);

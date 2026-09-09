@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import type { Project } from "@/entities/project/@x/cv";
 import type { AssignedSkill } from "@/entities/skill/@x/cv";
 
 export interface Cv {
@@ -51,6 +52,26 @@ export const cvHeaderQuery = gql`
     cv(cvId: $cvId) { id name user { id } }
   }
 `;
+export interface CvProject {
+  id: string;
+  name: string;
+  domain: string;
+  description: string;
+  responsibilities: readonly string[];
+  start_date: string;
+  end_date: string | null;
+}
+export interface CvProjects extends Pick<Cv, "id" | "name" | "user"> {
+  projects: readonly CvProject[] | null;
+}
+export const cvProjectsQuery = gql`
+  query CvProjects($cvId: ID!) {
+    cv(cvId: $cvId) {
+      id name user { id }
+      projects { id name domain description responsibilities start_date end_date }
+    }
+  }
+`;
 export const createCvMutation = gql`
   mutation CreateCv($cv: CreateCvInput!) { createCv(cv: $cv) { ...CvFields } }
   ${cvFields}
@@ -61,4 +82,57 @@ export const updateCvMutation = gql`
 `;
 export const deleteCvMutation = gql`
   mutation DeleteCv($cv: DeleteCvInput!) { deleteCv(cv: $cv) { __typename } }
+`;
+
+export interface AddCvProjectInput {
+  cvId: string;
+  projectId: string;
+  start_date: string;
+  end_date: string | null;
+  roles: string[];
+  responsibilities: string[];
+}
+export const addCvProjectMutation = gql`
+  mutation AddCvProject($project: AddCvProjectInput!) {
+    addCvProject(project: $project) {
+      id
+      projects { id name domain description responsibilities start_date end_date }
+    }
+  }
+`;
+
+export interface CvProjectDetails extends CvProject {
+  roles: readonly string[];
+  project: Project;
+}
+export interface CvProjectDetailsData {
+  cv: { id: string; projects: readonly CvProjectDetails[] | null } | null;
+}
+export const cvProjectDetailsQuery = gql`
+  query CvProjectDetails($cvId: ID!) {
+    cv(cvId: $cvId) {
+      id
+      projects {
+        id name domain description responsibilities start_date end_date roles
+        project { id name domain description environment start_date end_date }
+      }
+    }
+  }
+`;
+export const updateCvProjectMutation = gql`
+  mutation UpdateCvProject($project: UpdateCvProjectInput!) {
+    updateCvProject(project: $project) {
+      id
+      projects { id name domain description responsibilities start_date end_date }
+    }
+  }
+`;
+
+export const removeCvProjectMutation = gql`
+  mutation RemoveCvProject($project: RemoveCvProjectInput!) {
+    removeCvProject(project: $project) {
+      id
+      projects { id name domain description responsibilities start_date end_date }
+    }
+  }
 `;

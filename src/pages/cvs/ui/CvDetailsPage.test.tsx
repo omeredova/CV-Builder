@@ -3,7 +3,7 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cvQuery, cvSkillsQuery, cvHeaderQuery, updateCvMutation } from "@/entities/cv";
+import { cvQuery, cvSkillsQuery, cvProjectsQuery, cvHeaderQuery, updateCvMutation } from "@/entities/cv";
 import { skillCategoriesQuery } from "@/entities/skill";
 import { currentAccountQuery } from "@/entities/employee";
 import { cvTabs } from "../model/cvTabs";
@@ -20,7 +20,7 @@ describe("CV details", () => {
   it.each([
     { tab: "details", query: cvQuery },
     { tab: "skills", query: cvSkillsQuery },
-    { tab: "projects", query: cvHeaderQuery },
+    { tab: "projects", query: cvProjectsQuery },
     { tab: "preview", query: cvHeaderQuery },
   ] as const)("handles a missing CV on the $tab tab", async ({ tab, query }) => {
     render(<MockedProvider mocks={[
@@ -57,6 +57,7 @@ describe("CV details", () => {
       account, details(),
       { ...details("owner", cvSkillsQuery), delay: Infinity },
       { ...details("owner", cvHeaderQuery), delay: Infinity },
+      { ...details("owner", cvProjectsQuery), delay: Infinity },
     ]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
     await screen.findByRole("textbox", { name: "Name" });
     if (clearCache) act(() => { cache.evict({ id: "ROOT_QUERY", fieldName: "cv" }); });
@@ -96,7 +97,7 @@ describe("CV details", () => {
 
   it("changes the URL, panel, underline and breadcrumb with keyboard navigation and browser history", async () => {
     const user = userEvent.setup();
-    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), categories]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
+    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), categories]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
     await screen.findByRole("textbox", { name: "Name" });
     const detailsTab = screen.getByRole("tab", { name: "Details" });
     detailsTab.focus();
@@ -115,11 +116,32 @@ describe("CV details", () => {
 
   it.each(cvTabs)("restores $label from the route on a fresh page load", async ({ value, label }) => {
     window.history.replaceState(null, "", `/cvs/cv1/${value}`);
-    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), categories]}><CvDetailsPage cvId="cv1" initialTab={value} /></MockedProvider>);
+    render(<MockedProvider mocks={[account, details(), details("owner", cvSkillsQuery), details("owner", cvHeaderQuery), details("owner", cvProjectsQuery), categories]}><CvDetailsPage cvId="cv1" initialTab={value} /></MockedProvider>);
     await screen.findByText("Engineer", { selector: "nav span" });
     expect(screen.getByRole("tab", { name: label })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tabpanel", { name: label })).toBeInTheDocument();
-    if (value === "projects" || value === "preview") expect(screen.getByRole("tabpanel", { name: label })).toBeEmptyDOMElement();
+    if (value === "projects") expect(screen.getByRole("searchbox", { name: "Search CV projects" })).toBeInTheDocument();
+    if (value === "preview") expect(screen.getByRole("tabpanel", { name: label })).toBeEmptyDOMElement();
+  });
+
+  it("loads projects for the selected CV instead of projects cached for another CV", async () => {
+    const cache = new InMemoryCache();
+    cache.writeQuery({ query: cvProjectsQuery, variables: { cvId: "other" }, data: { cv: { ...cv, id: "other", projects: [{ __typename: "CvProject", id: "p1", name: "Other CV project", domain: "Finance", description: "Other", responsibilities: [], start_date: "2024-01-01", end_date: null }] } } });
+    render(<MockedProvider cache={cache} mocks={[account, details("owner", cvProjectsQuery)]}><CvDetailsPage cvId="cv1" initialTab="projects" /></MockedProvider>);
+    expect(await screen.findByText("No projects added yet")).toBeInTheDocument();
+    expect(screen.queryByText("Other CV project")).not.toBeInTheDocument();
+  });
+
+  it("retries a failed projects request", async () => {
+    const user = userEvent.setup();
+    render(<MockedProvider mocks={[
+      account,
+      { request: { query: cvProjectsQuery, variables: { cvId: "cv1" } }, error: new Error("Unavailable") },
+      details("owner", cvProjectsQuery),
+    ]}><CvDetailsPage cvId="cv1" initialTab="projects" /></MockedProvider>);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Failed to load projects");
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByText("No projects added yet")).toBeInTheDocument();
   });
 
   it("updates the selected CV and breadcrumb through the details form", async () => {
