@@ -6,3 +6,4 @@ export type { AssignedSkill, SkillCategory, SkillMastery, SkillMasteryDisplay } 
 export { skillMasteryOptions } from "./model/mastery";
 export { skillCategoriesQuery, type SkillCategoriesQueryData } from "./api/skillCategoriesQuery";
 export { SkillGroupsSkeleton } from "./ui/SkillGroupsSkeleton";
+export { groupSkills } from "./model/groupSkills";
