@@ -53,7 +53,7 @@ export function CollectionPagination({ disabled = false, onPageChange, onPageSiz
             <ChevronRightIcon className="h-chevron-height w-chevron-width rotate-90 text-pagination-icon" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-pagination-page-size">
+        <DropdownMenuContent align="end" className="w-pagination-page-size min-w-pagination-page-size" variant="actions">
           {pageSizeOptions.map((option) => <DropdownMenuItem key={option} onSelect={() => onPageSizeChange(option)}>{option}</DropdownMenuItem>)}
         </DropdownMenuContent>
       </DropdownMenu>
