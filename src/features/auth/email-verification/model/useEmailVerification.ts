@@ -3,7 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 
 import { getErrorMessage } from "../../model/authError";
-import { getAccessToken, isVerificationSessionExpired } from "../../model/authSession";
+import { isVerificationSessionExpired } from "../../model/authSession";
 import {
   type AuthRequestState,
   useRequestError,
@@ -50,13 +50,8 @@ export function useEmailVerification(): UseEmailVerificationResult {
       return false;
     }
 
-    const accessToken = getAccessToken();
-
     try {
       await executeVerification({
-        context: {
-          headers: accessToken ? { authorization: `Bearer ${accessToken}` } : undefined,
-        },
         variables: { mail: { otp: code } },
       });
       return true;

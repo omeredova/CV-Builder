@@ -1,17 +1,16 @@
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from "@apollo/client";
-
-import { graphqlUrl } from "@/shared/config/graphql";
+import { ApolloLink, HttpLink } from "@apollo/client";
+import { ApolloClient, InMemoryCache } from "@apollo/client-integration-nextjs";
 
 import { authenticationErrorLink } from "./authenticationErrorLink";
-import { authorizationLink } from "./authorizationLink";
 import { requestLoadingLink } from "./requestLoadingLink";
 
-export const apolloClient = new ApolloClient({
-  cache: new InMemoryCache(),
-  link: ApolloLink.from([
-    requestLoadingLink,
-    authenticationErrorLink,
-    authorizationLink,
-    new HttpLink({ uri: graphqlUrl }),
-  ]),
-});
+export function makeClient(): ApolloClient {
+  return new ApolloClient({
+    cache: new InMemoryCache(),
+    link: ApolloLink.from([
+      requestLoadingLink,
+      authenticationErrorLink,
+      new HttpLink({ uri: "/api/graphql", credentials: "same-origin" }),
+    ]),
+  });
+}

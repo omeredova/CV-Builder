@@ -17,28 +17,8 @@ export interface AuthPayload {
   };
 }
 
-export function saveAuthSession({ accessToken, refreshToken }: AuthSession): void {
-  sessionStorage.setItem(accessTokenKey, accessToken);
-  sessionStorage.setItem(refreshTokenKey, refreshToken);
-}
-
-export function saveAuthPayload(payload: AuthPayload): void {
-  saveAuthSession({
-    accessToken: payload.access_token,
-    refreshToken: payload.refresh_token,
-  });
-}
-
 export function startVerificationSession(): void {
   sessionStorage.setItem(verificationStartedAtKey, Date.now().toString());
-}
-
-export function getAccessToken(): string | null {
-  return sessionStorage.getItem(accessTokenKey);
-}
-
-export function getRefreshToken(): string | null {
-  return sessionStorage.getItem(refreshTokenKey);
 }
 
 export function clearAuthSession(): void {

@@ -1,3 +1,4 @@
+import { InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -36,18 +37,23 @@ describe("CV preview", () => {
     await user.click(screen.getByRole("button", { name: "Retry" }));
     expect(await screen.findByRole("heading", { name: "Alex Smith" })).toBeInTheDocument();
   });
-  it("exports the displayed resume with a CV filename and permits retry after export failure", async () => {
+  it("exports the hydrated resume only on click and permits retry after export failure", async () => {
     const user = userEvent.setup();
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     Object.defineProperty(URL, "createObjectURL", { configurable: true, value: vi.fn(() => "blob:pdf") });
     Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
     const download = vi.spyOn(document.body, "append");
     const variables = vi.fn((value: { pdf: { html: string } }) => value.pdf.html.includes("Alex Smith") && !value.pdf.html.includes("Export PDF"));
-    render(<MockedProvider mocks={[preview, categories,
+    const cache = new InMemoryCache();
+    cache.writeQuery({ ...request, data: preview.result.data });
+    cache.writeQuery({ ...categories.request, data: categories.result.data });
+    render(<MockedProvider cache={cache} mocks={[
       { request: { query: exportPdfMutation, variables }, error: new Error("Unavailable") },
       { request: { query: exportPdfMutation, variables }, result: { data: { exportPdf: btoa("%PDF-1.7\n") } } },
     ]}><CvPreview cvId="cv" ownerId="owner" /></MockedProvider>);
-    await screen.findByRole("heading", { name: "Alex Smith" });
+    expect(screen.getByRole("heading", { name: "Alex Smith" })).toBeInTheDocument();
+    expect(variables).not.toHaveBeenCalled();
+    expect(click).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Export PDF" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Failed to export PDF");
     await user.click(screen.getByRole("button", { name: "Export PDF" }));

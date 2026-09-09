@@ -1,3 +1,4 @@
+import { InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -20,6 +21,17 @@ const languagesMock = {
 };
 
 describe("LanguagesPage", () => {
+  it("renders hydrated assigned items immediately and keeps editing interactive", async () => {
+    const cache = new InMemoryCache();
+    cache.writeQuery({ ...accountRequest, data: accountResult.data });
+    cache.writeQuery({ ...languagesMock.request, data: languagesMock.result.data });
+    render(<MockedProvider cache={cache} mocks={[]}><LanguagesPage /></MockedProvider>);
+    expect(screen.getByText("English")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Loading languages" })).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "REMOVE LANGUAGES" }));
+    expect(screen.getByRole("button", { name: "CANCEL" })).toBeInTheDocument();
+  });
+
   it("loads the signed-in user's editable languages with a single Languages breadcrumb", async () => {
     const user = userEvent.setup();
     render(<MockedProvider mocks={[

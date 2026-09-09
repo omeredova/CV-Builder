@@ -12,16 +12,16 @@ export function useCvDetailsPage(cvId: string, initialTab: CvTab) {
   });
   const { account, loading: accountLoading, error: accountError } = useCurrentAccount();
   const details = useQuery<CvQueryData, CvQueryVariables>(cvQuery, {
-    fetchPolicy: "network-only", variables: { cvId }, skip: !account || activeTab !== "details", context: { skipGlobalLoader: true },
+    fetchPolicy: "cache-first", variables: { cvId }, skip: !account || activeTab !== "details", context: { skipGlobalLoader: true },
   });
   const skills = useQuery<CvQueryData<CvSkills>, CvQueryVariables>(cvSkillsQuery, {
-    fetchPolicy: "network-only", variables: { cvId }, skip: !account || activeTab !== "skills", context: { skipGlobalLoader: true },
+    fetchPolicy: "cache-first", variables: { cvId }, skip: !account || activeTab !== "skills", context: { skipGlobalLoader: true },
   });
   const header = useQuery<CvQueryData<Pick<Cv, "id" | "name" | "user">>, CvQueryVariables>(cvHeaderQuery, {
-    fetchPolicy: "network-only", variables: { cvId }, skip: !account || activeTab !== "preview", context: { skipGlobalLoader: true },
+    fetchPolicy: "cache-first", variables: { cvId }, skip: !account || activeTab !== "preview", context: { skipGlobalLoader: true },
   });
   const projects = useQuery<CvQueryData<CvProjects>, CvQueryVariables>(cvProjectsQuery, {
-    fetchPolicy: "network-only", variables: { cvId }, skip: !account || activeTab !== "projects", context: { skipGlobalLoader: true },
+    fetchPolicy: "cache-first", variables: { cvId }, skip: !account || activeTab !== "projects", context: { skipGlobalLoader: true },
   });
   const query = activeTab === "details" ? details : activeTab === "skills" ? skills : activeTab === "projects" ? projects : header;
   const cv = query.data?.cv?.user?.id === account?.id ? query.data?.cv : undefined;

@@ -23,7 +23,7 @@ export function useCvs() {
   }
   const query = useQuery<CvsData, CvsVariables>(cvsQuery, {
     skip: !account,
-    fetchPolicy: "network-only",
+    fetchPolicy: "cache-first",
     variables: { userId: account?.id ?? "", params: { page, limit: pageSize, search: debouncedSearch, sort_by: "name", sort_order: sortOrder } },
     context: { skipGlobalLoader: true },
   });

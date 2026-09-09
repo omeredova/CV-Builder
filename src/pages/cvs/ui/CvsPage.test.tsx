@@ -1,3 +1,4 @@
+import { InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -13,6 +14,15 @@ function list(items: CvListItem[], overrides = {}, totalPages = 1) {
   return { request: { query: cvsQuery, variables: { userId: "owner", params: { page: 1, limit: 10, search: "", sort_by: "name", sort_order: "asc", ...overrides } } }, result: { data: { cvsByUserId: { items: items.map((cv) => ({ __typename: "Cv", ...cv })), page: 1, total_pages: totalPages, total: items.length } } } };
 }
 describe("CVs employee page", () => {
+  it("renders the hydrated owner list immediately without refetching", () => {
+    const cache = new InMemoryCache();
+    const initial = list([own]);
+    cache.writeQuery({ query: currentAccountQuery, data: account.result.data });
+    cache.writeQuery({ ...initial.request, data: initial.result.data });
+    render(<MockedProvider cache={cache} mocks={[]}><CvsPage /></MockedProvider>);
+    expect(screen.getByText("Engineer")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Loading CVs" })).not.toBeInTheDocument();
+  });
   it("loads only owned records and links the selected CV to details", async () => {
     const user = userEvent.setup();
     render(<MockedProvider mocks={[account, list([own]), { request: { query: cvQuery, variables: { cvId: "cv1" } }, result: { data: { cv: { __typename: "Cv", ...own, description: "Experience", user: { id: "owner", email: "owner@example.com" } } } } }]}><CvsPage /></MockedProvider>);

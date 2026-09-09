@@ -12,6 +12,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "server-only": path.resolve(import.meta.dirname, "node_modules/server-only/empty.js"),
       "@/components/ui": path.resolve(import.meta.dirname, "./src/shared/ui"),
       "@": path.resolve(import.meta.dirname, "./src"),
     },
