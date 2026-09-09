@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useQuery, type QueryRef } from "@apollo/client/react";
+import type { ReactNode } from "react";
+import { ApolloDataBoundary } from "@/shared/api/graphql/ApolloDataBoundary";
 
 import { employeeQuery, mapUserToEmployee, type EmployeeQueryData } from "@/entities/employee";
 import { Button } from "@/shared/ui/button";
@@ -12,13 +14,13 @@ import { UserProfile } from "./UserProfile";
 export interface UserDetailsPageProps {
   userId: string;
   initialTab?: UserProfileTab;
+  tabQueryRef?: QueryRef<unknown>;
 }
 
-export function UserDetailsPage({ userId, initialTab = "profile" }: UserDetailsPageProps) {
+export function UserDetailsPage({ userId, initialTab = "profile", tabQueryRef }: UserDetailsPageProps): ReactNode {
   const { data, loading, error, refetch } = useQuery<EmployeeQueryData, { id: string }>(employeeQuery, {
     variables: { id: userId },
-    fetchPolicy: "network-only",
-    nextFetchPolicy: "cache-first",
+    fetchPolicy: "cache-first",
     context: { skipGlobalLoader: true },
   });
 
@@ -34,5 +36,7 @@ export function UserDetailsPage({ userId, initialTab = "profile" }: UserDetailsP
     </>;
   }
 
-  return <UserProfile key={userId} employee={mapUserToEmployee(data.user)} initialTab={initialTab} />;
+  const profile = <UserProfile key={userId} employee={mapUserToEmployee(data.user)} initialTab={initialTab} />;
+  // A missing employee must take precedence over a pending or failed tab query.
+  return tabQueryRef ? <ApolloDataBoundary queryRef={tabQueryRef}>{profile}</ApolloDataBoundary> : profile;
 }

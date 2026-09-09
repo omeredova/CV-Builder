@@ -18,6 +18,15 @@ function details(owner = "owner", query = cvQuery) {
 }
 afterEach(() => window.history.replaceState(null, "", "/"));
 describe("CV details", () => {
+  it("renders hydrated details immediately without refetching", () => {
+    const cache = new InMemoryCache();
+    cache.writeQuery({ query: currentAccountQuery, data: account.result.data });
+    cache.writeQuery({ query: cvQuery, variables: { cvId: "cv1" }, data: details().result.data });
+    render(<MockedProvider cache={cache} mocks={[]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
+    expect(screen.getByRole("textbox", { name: "Description" })).toHaveValue("Experience");
+    expect(screen.queryByRole("status", { name: "Loading CV" })).not.toBeInTheDocument();
+  });
+
   it.each([
     { tab: "details", query: cvQuery },
     { tab: "skills", query: cvSkillsQuery },
@@ -58,13 +67,14 @@ describe("CV details", () => {
       account, details(),
       { ...details("owner", cvSkillsQuery), delay: Infinity },
       { ...details("owner", cvHeaderQuery), delay: Infinity },
+      { request: { query: cvPreviewQuery, variables: { cvId: "cv1" } }, delay: Infinity },
       { ...details("owner", cvProjectsQuery), delay: Infinity },
     ]}><CvDetailsPage cvId="cv1" /></MockedProvider>);
     await screen.findByRole("textbox", { name: "Name" });
     if (clearCache) act(() => { cache.evict({ id: "ROOT_QUERY", fieldName: "cv" }); });
     for (const tab of ["Skills", "Projects", "Preview"]) {
       await user.click(screen.getByRole("tab", { name: tab }));
-      expect(screen.getByRole("status", { name: "Loading CV" })).toBeInTheDocument();
+      expect(screen.getByRole("status", { name: tab === "Preview" ? /Loading CV/ : "Loading CV" })).toBeInTheDocument();
       expect(within(screen.getByRole("navigation", { name: "breadcrumb" })).getByText("Engineer")).toBeInTheDocument();
     }
   });

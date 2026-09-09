@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { UsersPage } from "@/pages/users";
+import { UsersRoute } from "../server/UsersRoute";
 
 export const metadata: Metadata = { title: "Employees | CV Builder" };
 
 export default function HomeRoute() {
-  return <UsersPage />;
+  return <UsersRoute />;
 }

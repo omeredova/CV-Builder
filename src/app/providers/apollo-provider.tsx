@@ -1,16 +1,16 @@
 "use client";
 
-import { ApolloProvider as BaseApolloProvider } from "@apollo/client/react";
+import { ApolloNextAppProvider } from "@apollo/client-integration-nextjs";
 import type { ReactNode } from "react";
 
 import { ApiLoader } from "@/shared/api/api-loader";
-import { apolloClient } from "./apollo/apolloClient";
+import { makeClient } from "./apollo/apolloClient";
 
 export function ApolloProvider({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <BaseApolloProvider client={apolloClient}>
+    <ApolloNextAppProvider makeClient={makeClient}>
       {children}
       <ApiLoader />
-    </BaseApolloProvider>
+    </ApolloNextAppProvider>
   );
 }

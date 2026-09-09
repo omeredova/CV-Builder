@@ -1,3 +1,4 @@
+import { InMemoryCache } from "@apollo/client";
 import { MockedProvider } from "@apollo/client/testing/react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -16,11 +17,22 @@ const skillsMock = {
   request: { query: profileSkillsQuery, variables: { userId: "signed-in-user" } },
   result: { data: {
     profile: { id: "signed-in-user", skills: [{ name: "React", categoryId: "frontend", mastery: "Expert" }] },
-    skillCategories: [{ id: "frontend", name: "Frontend", order: 1, children: [] }],
+    skillCategories: [{ id: "frontend", name: "Frontend", order: 1, parent: null, children: [] }],
   } },
 };
 
 describe("SkillsPage", () => {
+  it("renders hydrated assigned items immediately and keeps editing interactive", async () => {
+    const cache = new InMemoryCache();
+    cache.writeQuery({ ...accountRequest, data: accountResult.data });
+    cache.writeQuery({ ...skillsMock.request, data: skillsMock.result.data });
+    render(<MockedProvider cache={cache} mocks={[]}><SkillsPage /></MockedProvider>);
+    expect(screen.getByText("React")).toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Loading skills" })).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "REMOVE SKILLS" }));
+    expect(screen.getByRole("button", { name: "CANCEL" })).toBeInTheDocument();
+  });
+
   it("loads the signed-in user's editable skills with a single Skills breadcrumb", async () => {
     const user = userEvent.setup();
     render(<MockedProvider mocks={[

@@ -1,33 +1,23 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthSession, isVerificationSessionExpired, startVerificationSession } from "./authSession";
 
-import {
-  clearAuthSession,
-  getAccessToken,
-  getRefreshToken,
-  saveAuthSession,
-  startVerificationSession,
-} from "./authSession";
-
-describe("clearAuthSession", () => {
-  beforeEach(() => {
-    sessionStorage.clear();
-  });
-
-  it("removes authentication and verification data", () => {
-    saveAuthSession({ accessToken: "access", refreshToken: "refresh" });
+describe("browser session cleanup", () => {
+  beforeEach(() => { sessionStorage.clear(); });
+  it("removes legacy browser credentials and verification data", () => {
+    sessionStorage.setItem("accessToken", "legacy-access");
+    sessionStorage.setItem("refreshToken", "legacy-refresh");
     startVerificationSession();
-
     clearAuthSession();
-
-    expect(sessionStorage.getItem("accessToken")).toBeNull();
-    expect(sessionStorage.getItem("refreshToken")).toBeNull();
-    expect(sessionStorage.getItem("verificationStartedAt")).toBeNull();
+    expect(sessionStorage.length).toBe(0);
   });
-
-  it("returns the current access and refresh tokens", () => {
-    saveAuthSession({ accessToken: "access", refreshToken: "refresh" });
-
-    expect(getAccessToken()).toBe("access");
-    expect(getRefreshToken()).toBe("refresh");
+  it("keeps the verification timer without storing credentials", () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      startVerificationSession();
+      expect(sessionStorage.length).toBe(1);
+      expect(isVerificationSessionExpired()).toBe(false);
+      now.mockReturnValue(1000 + 10 * 60 * 1000);
+      expect(isVerificationSessionExpired()).toBe(true);
+    } finally { now.mockRestore(); }
   });
 });

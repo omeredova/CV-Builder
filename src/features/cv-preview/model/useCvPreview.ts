@@ -11,7 +11,7 @@ export function useCvPreview(cvId: string, ownerId: string) {
   const exportingRef = useRef(false);
   const [exportError, setExportError] = useState(false);
   const preview = useQuery<CvQueryData<PreviewCv>, CvQueryVariables>(cvPreviewQuery, {
-    variables: { cvId }, fetchPolicy: "network-only", context: { skipGlobalLoader: true },
+    variables: { cvId }, fetchPolicy: "cache-first", context: { skipGlobalLoader: true },
   });
   const cv = preview.data?.cv?.user?.id === ownerId ? preview.data.cv : undefined;
   const categories = useQuery<SkillCategoriesQueryData>(skillCategoriesQuery, {

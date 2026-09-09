@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
-import { graphqlUrl } from "./src/shared/config/graphql";
-
 const nextConfig: NextConfig = {
-  env: {
-    VITE_GRAPHQL_URL: graphqlUrl,
-  },
   pageExtensions: ["page.tsx", "page.ts"],
   images: {
     remotePatterns: [

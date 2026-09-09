@@ -1,5 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+import { Suspense } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { employeesQuery } from "@/entities/employee";
@@ -16,7 +17,7 @@ afterEach(() => { window.history.replaceState(null, "", "/"); sessionStorage.cle
 describe("UsersPage", () => {
   it("links to the selected employee profile", async () => {
 
-    render(
+    await act(async () => { render(
       <MockedProvider
         mocks={[
           {
@@ -47,9 +48,9 @@ describe("UsersPage", () => {
           },
         ]}
       >
-        <UsersPage />
+        <Suspense fallback={<p>Loading employees</p>}><UsersPage /></Suspense>
       </MockedProvider>,
-    );
+    ); });
 
     expect(await screen.findByRole("link", { name: "Open Ada Lovelace profile" })).toHaveAttribute("href", "/users/employee-1/profile");
   });

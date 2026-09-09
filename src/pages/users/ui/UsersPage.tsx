@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
+import { useSuspenseQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { useState } from "react";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
@@ -35,12 +35,13 @@ export function UsersPage() {
   function setPage(value: number): void {
     setPagination({ page: value, search: debouncedSearch });
   }
-  const { data, error, loading: isLoading, refetch } = useQuery<
+  const { data, error, refetch } = useSuspenseQuery<
     UsersQueryData,
     UsersQueryVariables
   >(
     employeesQuery,
     {
+      errorPolicy: "all",
       variables: createUsersQueryVariables({
         limit: pageSize,
         page,
@@ -72,7 +73,7 @@ export function UsersPage() {
       <EmployeesTable
         employees={users?.employees ?? []}
         errorMessage={error ? "Unable to load employees" : undefined}
-        isLoading={isLoading}
+        isLoading={false}
         onPageChange={setPage}
         onPageSizeChange={(nextPageSize) => {
           setPage(1);

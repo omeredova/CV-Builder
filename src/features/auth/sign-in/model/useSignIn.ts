@@ -1,61 +1,44 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
-
-import { getErrorMessage } from "../../model/authError";
-import { saveAuthPayload } from "../../model/authSession";
-import {
-  type AuthRequestState,
-  useRequestError,
-} from "../../model/useRequestError";
-import {
-  signInMutation,
-  type SignInMutationData,
-  type SignInMutationVariables,
-} from "../api/signInMutation";
+import { useApolloClient } from "@apollo/client/react";
+import { useRef, useState } from "react";
+import { signInAction } from "../../server/actions";
+import { clearAuthSession } from "../../model/authSession";
+import { type AuthRequestState, useRequestError } from "../../model/useRequestError";
 import type { AuthenticationError } from "./authenticationError";
 import type { SignInValues } from "./validation";
+
+export { getAuthenticationError } from "./authenticationError";
 
 export interface UseSignInResult extends AuthRequestState<AuthenticationError> {
   signIn: (values: SignInValues) => Promise<boolean>;
 }
 
-export function getAuthenticationError(error: unknown): AuthenticationError {
-  return getErrorMessage(error).includes("invalidCredentials")
-    ? "invalidCredentials"
-    : "server";
-}
-
 export function useSignIn(): UseSignInResult {
+  const client = useApolloClient();
   const { clearError, error, setError } = useRequestError<AuthenticationError>();
-  const [executeSignIn, { loading }] = useMutation<
-    SignInMutationData,
-    SignInMutationVariables
-  >(signInMutation);
+  const [isLoading, setLoading] = useState(false);
+  const pending = useRef(false);
 
   async function signIn(values: SignInValues): Promise<boolean> {
+    if (pending.current) return false;
+    pending.current = true;
+    setLoading(true);
     clearError();
-
     try {
-      const result = await executeSignIn({ variables: { auth: values } });
-      const auth = result.data?.login;
-
-      if (!auth) {
-        throw new Error("missingSignInData");
-      }
-
-      saveAuthPayload(auth);
+      const result = await signInAction(values);
+      if (result.error) { setError(result.error); return false; }
+      clearAuthSession();
+      await client.clearStore();
       return true;
-    } catch (requestError: unknown) {
-      setError(getAuthenticationError(requestError));
+    } catch {
+      setError("server");
       return false;
+    } finally {
+      pending.current = false;
+      setLoading(false);
     }
   }
 
-  return {
-    clearError,
-    error,
-    isLoading: loading,
-    signIn,
-  };
+  return { clearError, error, isLoading, signIn };
 }
