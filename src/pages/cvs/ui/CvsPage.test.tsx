@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { cvsQuery, cvQuery, type CvListItem } from "@/entities/cv";
 import { currentAccountQuery } from "@/entities/employee";
+import { DEFAULT_DEBOUNCE_DELAY_MS } from "@/shared/lib/use-debounced-value";
 import { CvsPage } from "./CvsPage";
 
 const account = { request: { query: currentAccountQuery }, result: { data: { me: { id: "owner", email: "owner@example.com", avatar: null, first_name: "Test", last_name: "User" } } } };
@@ -33,7 +34,7 @@ describe("CVs employee page", () => {
     await screen.findByText("Engineer");
     expect(screen.getByRole("button", { name: "Sort by Name" }).closest("th")).toHaveAttribute("aria-sort", "descending");
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "NO MATCH" } });
-    expect(await screen.findByText("No CVs found")).toBeInTheDocument();
+    expect(await screen.findByText("No CVs found", {}, { timeout: DEFAULT_DEBOUNCE_DELAY_MS + 1000 })).toBeInTheDocument();
     expect(screen.getByRole("searchbox")).toHaveValue("NO MATCH");
   });
   it("retries list failures and allows creating the first CV", async () => {

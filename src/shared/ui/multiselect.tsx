@@ -1,8 +1,10 @@
 "use client";
 
+import { defaultFilter } from "cmdk";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useId, useState } from "react";
 import { cn } from "@/shared/lib/class-names";
+import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "./command";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
 import type { SelectOption } from "./select";
@@ -37,16 +39,37 @@ export function Multiselect({ label, value, options, onValueChange, disabled, re
         <PopoverTrigger asChild><button id={id} type="button" role="combobox" aria-label={label} aria-expanded={open && !disabled} aria-haspopup="dialog" aria-controls={open ? `${id}-options` : undefined} aria-required={required} aria-invalid={!!error} aria-describedby={error ? `${id}-error` : undefined} disabled={disabled} className="absolute inset-0 flex items-center justify-end px-field-inline outline-none focus-visible:ring-2 focus-visible:ring-primary"><ChevronDown aria-hidden="true" className={cn("size-5", open && "rotate-180")} /></button></PopoverTrigger>
       </div></PopoverAnchor>
       <PopoverContent id={`${id}-options`} className="w-[var(--radix-popover-trigger-width)] min-w-72" onEscapeKeyDown={(event) => event.stopPropagation()}>
-        <Command><CommandInput aria-label={`Search ${label.toLowerCase()}`} placeholder="Search" />
-          <CommandList aria-multiselectable="true"><CommandEmpty>No options found</CommandEmpty>
-            {options.map((option) => <CommandItem key={option.value} value={option.label} aria-checked={value.includes(option.value)} onSelect={() => toggle(option.value)}>
-              <span aria-hidden="true" className="flex size-4 shrink-0 items-center justify-center border border-current">{value.includes(option.value) && <Check className="size-3" />}</span>
-              {option.label}<span className="sr-only">{value.includes(option.value) ? ", selected" : ", not selected"}</span>
-            </CommandItem>)}
-          </CommandList>
-        </Command>
+        <MultiselectOptions label={label} value={value} options={options} onToggle={toggle} />
       </PopoverContent>
     </Popover>
     {error && <p id={`${id}-error`} role="alert" className="mt-field-message-top pl-field-inline text-xs text-primary">{error}</p>}
   </div>;
+}
+
+interface MultiselectOptionsProps {
+  label: string;
+  value: readonly string[];
+  options: readonly SelectOption[];
+  onToggle: (value: string) => void;
+}
+
+function MultiselectOptions({ label, value, options, onToggle }: MultiselectOptionsProps) {
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search);
+  const filteredOptions = options
+    .map((option) => ({ option, score: defaultFilter(option.label, debouncedSearch) }))
+    .filter(({ score }) => score > 0)
+    .sort((left, right) => right.score - left.score)
+    .map(({ option }) => option);
+
+  return (
+    <Command label={`Search ${label.toLowerCase()}`} shouldFilter={false}><CommandInput aria-label={`Search ${label.toLowerCase()}`} placeholder="Search" value={search} onValueChange={setSearch} />
+      <CommandList aria-multiselectable="true"><CommandEmpty>No options found</CommandEmpty>
+        {filteredOptions.map((option) => <CommandItem key={option.value} value={option.label} aria-checked={value.includes(option.value)} onSelect={() => onToggle(option.value)}>
+          <span aria-hidden="true" className="flex size-4 shrink-0 items-center justify-center border border-current">{value.includes(option.value) && <Check className="size-3" />}</span>
+          {option.label}<span className="sr-only">{value.includes(option.value) ? ", selected" : ", not selected"}</span>
+        </CommandItem>)}
+      </CommandList>
+    </Command>
+  );
 }
