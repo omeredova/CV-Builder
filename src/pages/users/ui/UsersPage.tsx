@@ -2,7 +2,8 @@
 
 import { useQuery } from "@apollo/client/react";
 import Link from "next/link";
-import { useDeferredValue, useState } from "react";
+import { useState } from "react";
+import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 
 import {
   createUsersQueryVariables,
@@ -21,12 +22,19 @@ import { AppBreadcrumb } from "@/widgets/app-breadcrumb";
 import { EmployeesTable } from "@/widgets/employees-table";
 
 export function UsersPage() {
-  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, search: "" });
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<EmployeeSortField>();
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const deferredSearch = useDeferredValue(search);
+  const debouncedSearch = useDebouncedValue(search.trim());
+  const page = pagination.search === debouncedSearch ? pagination.page : 1;
+  if (pagination.search !== debouncedSearch) {
+    setPagination({ page: 1, search: debouncedSearch });
+  }
+  function setPage(value: number): void {
+    setPagination({ page: value, search: debouncedSearch });
+  }
   const { data, error, loading: isLoading, refetch } = useQuery<
     UsersQueryData,
     UsersQueryVariables
@@ -36,7 +44,7 @@ export function UsersPage() {
       variables: createUsersQueryVariables({
         limit: pageSize,
         page,
-        search: deferredSearch,
+        search: debouncedSearch,
         sortBy,
         sortOrder,
       }),
@@ -92,7 +100,6 @@ export function UsersPage() {
         )}
         searchProps={{
           onChange: (event) => {
-            setPage(1);
             setSearch(event.target.value);
           },
           value: search,

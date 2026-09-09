@@ -1,7 +1,8 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CvProject } from "@/entities/cv";
+import { DEFAULT_DEBOUNCE_DELAY_MS } from "@/shared/lib/use-debounced-value";
 import { CvProjects } from "./CvProjects";
 
 const projects: CvProject[] = [
@@ -11,6 +12,8 @@ const projects: CvProject[] = [
 function names(): string[] {
   return within(screen.getByRole("table")).getAllByRole("button", { name: /^Actions for/ }).map((button) => button.getAttribute("aria-label") ?? "");
 }
+afterEach(() => { cleanup(); vi.useRealTimers(); });
+
 describe("CV projects", () => {
   it("keeps search and the add action visible for an empty CV", () => {
     render(<CvProjects cvId="cv1" projects={[]} />);
@@ -20,18 +23,22 @@ describe("CV projects", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
   it("searches names and domains case-insensitively and restores results when cleared", async () => {
-    const user = userEvent.setup();
+    vi.useFakeTimers();
     render(<CvProjects cvId="cv1" projects={projects} />);
     const search = screen.getByRole("searchbox");
-    await user.type(search, "HEALTH");
+    fireEvent.change(search, { target: { value: "HEALTH" } });
+    await act(() => vi.advanceTimersByTimeAsync(DEFAULT_DEBOUNCE_DELAY_MS));
     expect(names()).toEqual(["Actions for Beta"]);
-    await user.clear(search);
-    await user.type(search, "ALPHA");
+    fireEvent.change(search, { target: { value: "" } });
+    fireEvent.change(search, { target: { value: "ALPHA" } });
+    await act(() => vi.advanceTimersByTimeAsync(DEFAULT_DEBOUNCE_DELAY_MS));
     expect(names()).toEqual(["Actions for Alpha"]);
-    await user.type(search, "missing");
+    fireEvent.change(search, { target: { value: "ALPHAmissing" } });
+    await act(() => vi.advanceTimersByTimeAsync(DEFAULT_DEBOUNCE_DELAY_MS));
     expect(screen.getByRole("status")).toHaveTextContent("No projects found");
     expect(search).toHaveValue("ALPHAmissing");
-    await user.clear(search);
+    fireEvent.change(search, { target: { value: "" } });
+    await act(() => vi.advanceTimersByTimeAsync(DEFAULT_DEBOUNCE_DELAY_MS));
     expect(names()).toEqual(["Actions for Alpha", "Actions for Beta"]);
   });
   it("sorts names and participation dates in both directions without mutating input", async () => {

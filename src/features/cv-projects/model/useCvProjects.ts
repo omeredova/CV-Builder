@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import type { CvProject } from "@/entities/cv";
 
 export type CvProjectSortField = "name" | "start_date" | "end_date";
@@ -8,7 +9,7 @@ export function useCvProjects(projects: readonly CvProject[]) {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<CvProjectSortField>("name");
   const [sortOrder, setSortOrder] = useState<CvProjectSortOrder>("asc");
-  const term = search.trim().toLocaleLowerCase();
+  const term = useDebouncedValue(search.trim().toLocaleLowerCase());
   const items = projects.filter((project) =>
     project.name.toLocaleLowerCase().includes(term) || project.domain.toLocaleLowerCase().includes(term),
   ).sort((left, right) => {
