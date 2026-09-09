@@ -12,16 +12,16 @@ function names(): string[] {
   return within(screen.getByRole("table")).getAllByRole("button", { name: /^Actions for/ }).map((button) => button.getAttribute("aria-label") ?? "");
 }
 describe("CV projects", () => {
-  it("keeps search and the deferred add action visible for an empty CV", () => {
-    render(<CvProjects projects={[]} />);
+  it("keeps search and the add action visible for an empty CV", () => {
+    render(<CvProjects cvId="cv1" projects={[]} />);
     expect(screen.getByRole("searchbox", { name: "Search CV projects" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "ADD PROJECT" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "ADD PROJECT" })).toBeEnabled();
     expect(screen.getByRole("status")).toHaveTextContent("No projects added yet");
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
   it("searches names and domains case-insensitively and restores results when cleared", async () => {
     const user = userEvent.setup();
-    render(<CvProjects projects={projects} />);
+    render(<CvProjects cvId="cv1" projects={projects} />);
     const search = screen.getByRole("searchbox");
     await user.type(search, "HEALTH");
     expect(names()).toEqual(["Actions for Beta"]);
@@ -36,7 +36,7 @@ describe("CV projects", () => {
   });
   it("sorts names and participation dates in both directions without mutating input", async () => {
     const user = userEvent.setup();
-    render(<CvProjects projects={projects} />);
+    render(<CvProjects cvId="cv1" projects={projects} />);
     await user.click(screen.getByRole("button", { name: "Sort by Name" }));
     expect(names()).toEqual(["Actions for Beta", "Actions for Alpha"]);
     for (const column of ["Start Date", "End Date"]) {

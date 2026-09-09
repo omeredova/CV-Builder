@@ -12,19 +12,20 @@ interface CvProjectsTableProps {
   sortField: CvProjectSortField;
   sortOrder: CvProjectSortOrder;
   onSort: (field: CvProjectSortField) => void;
+  onUpdate: (assignmentId: string) => void;
+  onRemove: (project: CvProject) => void;
 }
 
 const columns = [
   { label: "Name", field: "name" },
   { label: "Domain" },
-  { label: "Responsibilities" },
   { label: "Start Date", field: "start_date" },
   { label: "End Date", field: "end_date" },
 ] as const;
 
-export function CvProjectsTable({ projects, sortField, sortOrder, onSort }: CvProjectsTableProps) {
+export function CvProjectsTable({ projects, sortField, sortOrder, onSort, onUpdate, onRemove }: CvProjectsTableProps) {
   return <Table aria-label="CV projects" className="min-w-[760px] table-fixed">
-    <colgroup><col className="w-1/4" /><col className="w-1/5" /><col /><col className="w-32" /><col className="w-32" /><col className="w-cv-column-actions" /></colgroup>
+    <colgroup><col className="w-[30%]" /><col className="w-1/4" /><col /><col /><col className="w-cv-column-actions" /></colgroup>
     <TableHeader><TableRow>
       {columns.map((column) => {
         const field = "field" in column ? column.field : undefined;
@@ -41,15 +42,19 @@ export function CvProjectsTable({ projects, sortField, sortOrder, onSort }: CvPr
       <TableRow className="border-0">
         <TableCell className="whitespace-normal break-words text-table">{project.name}</TableCell>
         <TableCell className="whitespace-normal break-words text-table">{project.domain}</TableCell>
-        <TableCell className="whitespace-normal break-words text-table">{project.responsibilities.length ? <ul className="flex flex-wrap gap-1">{project.responsibilities.map((responsibility, index) => <li key={`${index}-${responsibility}`} className="rounded-control bg-disabled px-2 py-0.5">{responsibility}</li>)}</ul> : "—"}</TableCell>
         <TableCell className="text-table">{formatProjectDate(project.start_date)}</TableCell>
         <TableCell className="text-table">{formatProjectDate(project.end_date)}</TableCell>
         <TableCell className="px-0"><DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="icon" size="actionIcon" aria-label={`Actions for ${project.name}`}><MoreVertical aria-hidden="true" className="size-5 fill-current" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end" variant="actions"><DropdownMenuItem disabled>Update</DropdownMenuItem><DropdownMenuItem disabled>Delete</DropdownMenuItem></DropdownMenuContent>
+          <DropdownMenuTrigger asChild><Button id={`cv-project-actions-${project.id}`} variant="icon" size="actionIcon" aria-label={`Actions for ${project.name}`}><MoreVertical aria-hidden="true" className="size-5 fill-current" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end" variant="actions"><DropdownMenuItem onSelect={() => onUpdate(project.id)}>Update</DropdownMenuItem><DropdownMenuItem onSelect={() => onRemove(project)}>Delete</DropdownMenuItem></DropdownMenuContent>
         </DropdownMenu></TableCell>
       </TableRow>
-      <TableRow className="border-table-border"><TableCell colSpan={6} className="whitespace-pre-wrap break-words pt-0 text-table text-muted-foreground">{project.description || "—"}</TableCell></TableRow>
+      <TableRow className="border-table-border"><TableCell colSpan={5} className="whitespace-normal break-words pt-0 text-table">
+        <p className="whitespace-pre-wrap text-foreground/50">{project.description || "—"}</p>
+        {project.responsibilities.length > 0 && <ul aria-label={`Responsibilities for ${project.name}`} className="mt-3 flex flex-wrap gap-1">
+          {project.responsibilities.map((responsibility, index) => <li key={`${index}-${responsibility}`} className="rounded-control bg-[var(--badge-background)] px-2 py-0.5">{responsibility}</li>)}
+        </ul>}
+      </TableCell></TableRow>
     </Fragment>)}</TableBody>
   </Table>;
 }

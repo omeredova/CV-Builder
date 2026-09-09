@@ -11,19 +11,23 @@ export interface ModalProps {
   description?: ReactNode;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
+  returnFocusId?: string;
 }
 
-export function Modal({ title, description, onClose, children }: ModalProps) {
+export function Modal({ title, description, onClose, children, className, returnFocusId }: ModalProps) {
   const descriptionId = useId();
   const trigger = useRef<Element | null>(null);
 
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent
+      className={className}
       aria-describedby={description ? descriptionId : undefined}
       onOpenAutoFocus={() => { trigger.current = document.activeElement; }}
       onCloseAutoFocus={(event) => {
         event.preventDefault();
-        if (trigger.current instanceof HTMLElement && trigger.current.isConnected) trigger.current.focus();
+        const target = returnFocusId ? document.getElementById(returnFocusId) : trigger.current;
+        if (target instanceof HTMLElement && target.isConnected) target.focus();
       }}
       onInteractOutside={(event) => event.preventDefault()}
       onEscapeKeyDown={(event) => {

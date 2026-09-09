@@ -25,7 +25,7 @@ export function CvDetailsPage({ cvId, initialTab = "details" }: CvDetailsPagePro
         : !cv ? <p role="status">CV not found</p>
         : activeTab === "details" && detailsCv ? <CvDetailsForm key={cv.id} cv={detailsCv} />
         : activeTab === "skills" && skillsCv ? <CvSkillsManagement key={cv.id} cvId={cv.id} ownerId={cv.user?.id ?? ""} skills={skillsCv.skills} canEdit={cv.user?.id === account?.id} />
-        : activeTab === "projects" && projectsCv ? <CvProjects key={cv.id} projects={projectsCv.projects ?? []} />
+        : activeTab === "projects" && projectsCv ? <CvProjects key={cv.id} cvId={cv.id} projects={projectsCv.projects ?? []} />
         : null}
     </section>
   </>;
