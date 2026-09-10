@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { currentProfileQuery, userCreatedAtQuery, departmentsQuery, positionsQuery, type Employee } from "@/entities/employee";
+import { currentProfileQuery, employeeRoleQuery, userCreatedAtQuery, departmentsQuery, positionsQuery, type Employee } from "@/entities/employee";
 
 import { updateProfileMutation } from "@/features/profile-edit";
 
@@ -46,7 +46,8 @@ describe("UserProfile", () => {
       { request: { query: userCreatedAtQuery, variables: { id: employee.id } }, result: { data: { user: { __typename: "User", id: employee.id, created_at: "1705233600" } } } },
       { request: { query: departmentsQuery, variables: { page: 1 } }, result: departmentResult },
       { request: { query: positionsQuery, variables: { page: 1 } }, result: { data: { options: { items: [{ id: "p1", name: "Engineer" }], total_pages: 1 } } } },
-      { request: { query: createUpdateProfileMutation(true), variables: { profile: { userId: employee.id, first_name: employee.firstName, last_name: employee.lastName }, user: { userId: employee.id, departmentId: "d1", positionId: "p1" } } }, result: { data: { updateProfile: { id: employee.id, first_name: employee.firstName, last_name: employee.lastName }, updateUser: { id: employee.id, department: { id: "d1", name: "React" }, position: { id: "p1", name: "Engineer" } } } } },
+      { request: { query: employeeRoleQuery, variables: { userId: employee.id } }, result: { data: { user: { id: employee.id, role: "Employee" } } } },
+      { request: { query: createUpdateProfileMutation(true), variables: { profile: { userId: employee.id, first_name: employee.firstName, last_name: employee.lastName }, user: { userId: employee.id, departmentId: "d1", positionId: "p1", role: "Employee" } } }, result: { data: { updateProfile: { id: employee.id, first_name: employee.firstName, last_name: employee.lastName }, updateUser: { id: employee.id, department: { id: "d1", name: "React" }, position: { id: "p1", name: "Engineer" } } } } },
     ]}><UserProfile employee={{ ...employee, department: null, departmentId: null, position: null, positionId: null }} onProfileChange={onProfileChange} /></MockedProvider>);
     const update = await screen.findByRole("button", { name: "UPDATE" });
     expect(departmentResult).not.toHaveBeenCalled();

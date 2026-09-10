@@ -3,17 +3,18 @@ import { act, renderHook } from "@testing-library/react";
 import type { PropsWithChildren } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import { departmentsQuery, positionsQuery, type Employee } from "@/entities/employee";
+import { departmentsQuery, positionsQuery, employeeRoleQuery, type Employee } from "@/entities/employee";
 import { useEmploymentEdit } from "./useEmploymentEdit";
 
 const employee: Employee = { departmentId: "d1", positionId: "p1", id: "1", firstName: "Ada", lastName: "Lovelace", email: "ada@example.com", avatar: null, department: "React", position: "Engineer" };
 
 describe("useEmploymentEdit", () => {
-  it("uses IDs from props without a user query or role and caches every options page", async () => {
+  it("preserves the current role when preparing employment updates and caches options", async () => {
     const firstPage = vi.fn(() => ({ data: { options: { items: [{ id: "d1", name: "React" }], total_pages: 2 } } }));
     const secondPage = vi.fn(() => ({ data: { options: { items: [{ id: "d2", name: "Design" }], total_pages: 2 } } }));
     function Wrapper({ children }: PropsWithChildren) {
       return <MockedProvider mocks={[
+        { request: { query: employeeRoleQuery, variables: { userId: employee.id } }, result: { data: { user: { id: employee.id, role: "Admin" } } } },
         { request: { query: departmentsQuery, variables: { page: 1 } }, result: firstPage, maxUsageCount: 2 },
         { request: { query: departmentsQuery, variables: { page: 2 } }, result: secondPage, maxUsageCount: 2 },
       ]}>{children}</MockedProvider>;
@@ -25,7 +26,7 @@ describe("useEmploymentEdit", () => {
     expect(secondPage).toHaveBeenCalledTimes(1);
     act(() => result.current.select("department", "d2"));
     expect(result.current.changed).toBe(true);
-    expect(result.current.getInput()).toEqual({ userId: "1", departmentId: "d2", positionId: "p1" });
+    await act(async () => { expect(await result.current.getInput()).toEqual({ userId: "1", departmentId: "d2", positionId: "p1", role: "Admin" }); });
     act(() => { result.current.acceptSaved({ id: "1", department: { id: "d2", name: "Design" }, position: { id: "p1", name: "Engineer" } }); });
     expect(result.current.saved.department).toBe("Design");
     expect(result.current.saved.departmentId).toBe("d2");
@@ -57,7 +58,7 @@ describe("useEmploymentEdit", () => {
 
   it("does not fetch or save for another user's profile", async () => {
     const { result } = renderHook(() => useEmploymentEdit(employee, false), { wrapper: ({ children }) => <MockedProvider>{children}</MockedProvider> });
-    await act(async () => { await result.current.loadOptions("department"); result.current.select("department", "d2"); expect(result.current.getInput()).toBeUndefined(); });
+    await act(async () => { await result.current.loadOptions("department"); result.current.select("department", "d2"); expect(await result.current.getInput()).toBeUndefined(); });
     expect(result.current.options.department).toEqual({ items: [], loading: false });
     expect(result.current.changed).toBe(false);
   });
