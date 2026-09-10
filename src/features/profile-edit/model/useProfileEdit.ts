@@ -134,7 +134,8 @@ export function useProfileEdit(employee: Employee, canEdit: boolean, onChange?: 
     const changes: ProfileChanges = {};
     setStatus("saving");
     try {
-      const userInput = employment.getInput();
+      const userInput = await employment.getInput();
+      if (!mounted.current) return;
       const { data, error: requestError } = await mutate({
         variables: {
           profile: { userId: employee.id, first_name: firstName, last_name: lastName },

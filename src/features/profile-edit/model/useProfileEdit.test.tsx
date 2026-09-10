@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GraphQLError } from "graphql";
 
-import { departmentsQuery, type Employee } from "@/entities/employee";
+import { departmentsQuery, employeeRoleQuery, type Employee } from "@/entities/employee";
 import * as avatarFile from "./avatarFile";
 import { useProfileEdit } from "./useProfileEdit";
 import { createUpdateProfileMutation } from "../api/updateProfileMutation";
@@ -68,12 +68,13 @@ describe("useProfileEdit", () => {
 
   it("keeps employment edits pending when the combined profile update fails", async () => {
     const profile = { userId: employee.id, first_name: "Ada", last_name: "Lovelace" };
-    const user = { userId: employee.id, departmentId: "d2", positionId: "p1" };
+    const user = { userId: employee.id, departmentId: "d2", positionId: "p1", role: "Employee" };
     const names = { id: employee.id, first_name: "Ada", last_name: "Lovelace" };
     const request = { query: createUpdateProfileMutation(true), variables: { profile, user } };
     const { result } = renderHook(() => useProfileEdit(employee, true), {
       wrapper: ({ children }) => <MockedProvider mocks={[
         { request: { query: departmentsQuery, variables: { page: 1 } }, result: { data: { options: { items: [{ id: "d2", name: "Design" }], total_pages: 1 } } } },
+        { request: { query: employeeRoleQuery, variables: { userId: employee.id } }, result: { data: { user: { id: employee.id, role: "Employee" } } }, maxUsageCount: 2 },
         { request, result: { data: { updateProfile: names }, errors: [new GraphQLError("Failed", { path: ["updateUser"] })] } },
         { request, result: { data: { updateProfile: names, updateUser: { id: employee.id, department: { id: "d2", name: "Design" }, position: { id: "p1", name: "Engineer" } } } } },
       ]}>{children}</MockedProvider>,
@@ -86,6 +87,47 @@ describe("useProfileEdit", () => {
     await act(async () => { await result.current.submit(); });
     expect(result.current.employment.saved.departmentId).toBe("d2");
     expect(result.current.canSubmit).toBe(false);
+  });
+
+  it("does not mutate when the current role cannot be loaded and retries without losing edits", async () => {
+    let roleRequests = 0;
+    const fetchRequest = vi.fn<typeof fetch>(async (_input, init) => {
+      const body = JSON.parse(String(init?.body)) as { operationName: string; variables: { user?: { role: string } } };
+      let response: unknown;
+      if (body.operationName === "EmployeeRole") {
+        roleRequests += 1;
+        response = roleRequests === 1
+          ? { errors: [{ message: "Unavailable" }] }
+          : { data: { user: { id: employee.id, role: "Admin" } } };
+      } else if (body.operationName === "UpdateProfile") {
+        expect(body.variables.user?.role).toBe("Admin");
+        response = { data: {
+          updateProfile: { id: employee.id, first_name: "Grace", last_name: "Lovelace" },
+          updateUser: { id: employee.id, department: { id: "d2", name: "Design" }, position: { id: "p1", name: "Engineer" } },
+        } };
+      } else {
+        response = { data: { options: { items: [{ id: "d2", name: "Design" }], total_pages: 1 } } };
+      }
+      return new Response(JSON.stringify(response), { headers: { "Content-Type": "application/json" } });
+    });
+    const link = new HttpLink({ uri: "https://example.com/graphql", fetch: fetchRequest });
+    const onChange = vi.fn();
+    const { result } = renderHook(() => useProfileEdit(employee, true, onChange), {
+      wrapper: ({ children }) => <MockedProvider link={link}>{children}</MockedProvider>,
+    });
+    await act(async () => { await result.current.employment.loadOptions("department"); });
+    act(() => { result.current.employment.select("department", "d2"); result.current.setFirstName("Grace"); });
+    await act(async () => { await result.current.submit(); });
+    expect(fetchRequest).toHaveBeenCalledTimes(2);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(result.current.error).toContain("Unable to update profile");
+    expect(result.current.firstName).toBe("Grace");
+    expect(result.current.canSubmit).toBe(true);
+    await act(async () => { await result.current.submit(); });
+    expect(fetchRequest).toHaveBeenCalledTimes(4);
+    expect(result.current.error).toBeNull();
+    expect(result.current.canSubmit).toBe(false);
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ firstName: "Grace", departmentId: "d2" }));
   });
 
   it("does not upload or notify after unmounting during file reading", async () => {

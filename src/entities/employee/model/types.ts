@@ -45,6 +45,7 @@ export interface EmployeeEmployment {
 
 export interface EmploymentUpdate {
   userId: string;
+  role: string;
   departmentId: string;
   positionId: string;
 }

@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import {
   fetchEmploymentOptions,
+  employeeRoleQuery, type EmployeeRoleQueryData, type EmployeeRoleQueryVariables,
   type Employee, type EmployeeEmployment, type EmploymentUpdate, type EmploymentField, type EmploymentOption,
 } from "@/entities/employee";
 
@@ -22,7 +23,7 @@ interface EmploymentEditState {
   validationErrors: Record<EmploymentField, string | undefined>;
   loadOptions: (field: EmploymentField) => Promise<void>;
   select: (field: EmploymentField, id: string) => void;
-  getInput: () => EmploymentUpdate | undefined;
+  getInput: () => Promise<EmploymentUpdate | undefined>;
   acceptSaved: (user: EmployeeEmployment) => EmploymentDetails;
 }
 
@@ -61,12 +62,18 @@ export function useEmploymentEdit(employee: Employee, canEdit: boolean): Employm
     if (option) setSelection((previous) => ({ ...previous, [field]: option }));
   }
 
-  function getInput(): EmploymentUpdate | undefined {
+  async function getInput(): Promise<EmploymentUpdate | undefined> {
     if (!canEdit || !changed) return;
     const departmentId = selection.department?.id ?? saved.departmentId;
     const positionId = selection.position?.id ?? saved.positionId;
     if (!departmentId || !positionId) throw new Error("Select a department and position");
-    return { userId: employee.id, departmentId, positionId };
+    const { data } = await client.query<EmployeeRoleQueryData, EmployeeRoleQueryVariables>({
+      query: employeeRoleQuery,
+      variables: { userId: employee.id },
+      fetchPolicy: "network-only",
+    });
+    if (!data?.user?.role) throw new Error("Unable to load the current user role");
+    return { userId: employee.id, departmentId, positionId, role: data.user.role };
   }
 
   function acceptSaved(user: EmployeeEmployment): EmploymentDetails {
